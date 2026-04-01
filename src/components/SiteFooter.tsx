@@ -22,6 +22,7 @@ export function SiteFooter({
   mainSiteUrl,
 }: Props) {
   const dict = getDictionary(locale);
+  const year = new Date().getFullYear();
   const primary = addresses[0];
   const mapsQuery =
     primary?.rue?.trim() ||
@@ -36,13 +37,13 @@ export function SiteFooter({
     "fa-display border-l-[3px] border-[#f43f5e] pl-3 text-sm font-extrabold uppercase tracking-[0.12em] text-neutral-950";
 
   return (
-    <footer className="mt-16 overflow-hidden rounded-3xl border border-rose-100/90 bg-gradient-to-b from-white via-rose-50/20 to-fuchsia-50/30 py-10 shadow-[0_20px_50px_rgba(244,63,94,0.08)] sm:mt-20 md:mt-24">
-      <div className="grid grid-cols-1 gap-10 px-4 sm:grid-cols-2 sm:px-5 lg:grid-cols-12 lg:gap-8 md:px-6">
+    <footer className="mt-16 overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-b from-white via-white to-rose-50/35 py-10 shadow-[0_20px_50px_rgba(15,23,42,0.08)] sm:mt-20 md:mt-24">
+      <div className="grid grid-cols-1 gap-8 px-4 sm:grid-cols-2 sm:px-5 lg:grid-cols-12 lg:gap-8 md:px-6">
         <div className="lg:col-span-4">
-          <p className="fa-display bg-gradient-to-r from-[#0b1229] via-[#f43f5e] to-[#8b5cf6] bg-clip-text text-base font-extrabold leading-tight text-transparent sm:text-lg">
+          <p className="fa-display bg-gradient-to-r from-[#0b1229] via-[#f43f5e] to-[#8b5cf6] bg-clip-text text-lg font-black leading-tight text-transparent sm:text-xl">
             {dict.brand}
           </p>
-          <p className="fa-display mt-3 max-w-md text-sm font-bold leading-relaxed text-neutral-800 sm:text-base">
+          <p className="fa-display mt-3 max-w-md text-sm font-semibold leading-relaxed text-neutral-700 sm:text-base">
             {dict.footerTagline}
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-2.5">
@@ -54,7 +55,7 @@ export function SiteFooter({
                 href="https://wa.me/41764414976"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-200/80 bg-white text-emerald-600 shadow-sm transition hover:scale-105 hover:shadow-md"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200/80 bg-white text-emerald-600 shadow-sm transition hover:scale-105 hover:shadow-md"
                 aria-label="WhatsApp"
               >
                 <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -65,7 +66,7 @@ export function SiteFooter({
                 href="https://www.tiktok.com/@success.drivingschool?_t=ZN-90NabfecqzG&_r=1"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-200/80 bg-white text-rose-600 shadow-sm transition hover:scale-105 hover:shadow-md"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-rose-200/80 bg-white text-rose-600 shadow-sm transition hover:scale-105 hover:shadow-md"
                 aria-label="TikTok"
               >
                 <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -76,7 +77,7 @@ export function SiteFooter({
                 href="https://www.instagram.com/success.drivingschool?igsh=NzR0MTZ2bjFnaWlh&utm_source=qr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-pink-200/80 bg-white text-pink-600 shadow-sm transition hover:scale-105 hover:shadow-md"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-pink-200/80 bg-white text-pink-600 shadow-sm transition hover:scale-105 hover:shadow-md"
                 aria-label="Instagram"
               >
                 <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -89,11 +90,11 @@ export function SiteFooter({
         <div className="lg:col-span-3">
           <p className={sectionTitleClass}>{dict.navLocation}</p>
           {addresses.length > 0 ? (
-            <ul className="mt-4 space-y-4 text-sm">
+            <ul className="mt-4 space-y-3.5 text-sm">
               {addresses.map((a) => (
                 <li
                   key={a.id}
-                  className="rounded-xl border border-rose-100/80 bg-white/90 p-3.5 shadow-md shadow-rose-100/50"
+                  className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm"
                 >
                   <p className="fa-display font-extrabold text-neutral-950">{a.ville}</p>
                   <p className="mt-1 text-sm font-bold leading-snug text-neutral-800">{a.service}</p>
@@ -165,9 +166,14 @@ export function SiteFooter({
           </ul>
         </div>
       </div>
-      <p className="fa-display mx-4 mt-10 border-t border-rose-200/90 pt-6 text-center text-sm font-bold text-neutral-700 sm:mx-5 sm:text-left md:mx-6">
-        {dict.footerRights}
-      </p>
+      <div className="mx-4 mt-10 flex flex-col gap-2 border-t border-slate-200 pt-6 text-center sm:mx-5 sm:flex-row sm:items-center sm:justify-between md:mx-6">
+        <p className="fa-display text-sm font-bold text-neutral-700">
+          {dict.footerRights}
+        </p>
+        <p className="fa-display text-sm font-semibold text-neutral-600">
+          © {year} Success Driving School
+        </p>
+      </div>
     </footer>
   );
 }

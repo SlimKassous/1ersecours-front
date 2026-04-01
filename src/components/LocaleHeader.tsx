@@ -15,9 +15,11 @@ const TOOLBAR_LOGO = "/branding/logo-nobackground-200.webp";
 type Props = {
   locale: Locale;
   phoneTel: string;
+  phoneDisplay?: string;
+  addressDisplay?: string;
 };
 
-export function LocaleHeader({ locale, phoneTel }: Props) {
+export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }: Props) {
   const dict = getDictionary(locale);
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,82 +57,95 @@ export function LocaleHeader({ locale, phoneTel }: Props) {
   }, [menuOpen]);
 
   const navLinkClass =
-    "block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-rose-50 sm:text-base md:inline-block md:py-2";
+    "block rounded-xl px-4 py-3 text-base font-extrabold text-slate-800 transition hover:bg-rose-50 md:inline-block md:px-4 md:py-2.5 md:text-[1.02rem]";
+  const displayPhone = phoneDisplay ?? phoneTel;
+  const displayAddress = addressDisplay ?? dict.locationAddress;
 
   return (
-    <header className="sticky top-0 z-[100] border-b border-rose-200/60 bg-white/90 shadow-sm shadow-rose-200/20 backdrop-blur-md">
-      <div className="relative mx-auto max-w-6xl px-3 sm:px-5 md:px-6">
+    <header className="fixed left-0 right-0 top-0 z-[120] border-b border-rose-200/60 bg-white/95 shadow-md shadow-rose-200/25 backdrop-blur-md">
+      <div className="relative mx-auto w-full max-w-[min(100%,100rem)] px-3 sm:px-5 md:px-7 lg:px-10 xl:px-12">
         {/* Logo à gauche, nav centrée (desktop), langue + menu à droite — comme ToolbarComponent mobile */}
-        <div className="flex min-h-[3.5rem] w-full min-w-0 items-center gap-2 py-1.5 md:min-h-[4rem] md:gap-3 md:py-2">
+        <div className="flex min-h-[4rem] w-full min-w-0 items-center gap-2 py-2 md:min-h-[4.5rem] md:gap-3 md:py-2.5">
           <Link
             href={`/${locale}`}
-            className="flex min-w-0 shrink-0 items-center gap-2 rounded-lg p-1 touch-manipulation [-webkit-tap-highlight-color:transparent] sm:gap-2.5 sm:p-1.5 md:gap-3"
+            className="flex min-w-0 shrink-0 items-center gap-2 rounded-xl p-1 pl-0 touch-manipulation [-webkit-tap-highlight-color:transparent] sm:gap-2.5 sm:p-1.5 sm:pl-0 md:gap-3"
           >
             <Image
               src={TOOLBAR_LOGO}
               alt="Success Driving School"
               width={200}
               height={60}
-              className="h-[48px] w-auto max-w-[min(180px,52vw)] shrink-0 object-contain object-left sm:h-[54px] sm:max-w-[min(200px,50vw)] md:h-[60px]"
+              className="h-[54px] w-auto max-w-[min(210px,60vw)] shrink-0 object-contain object-left sm:h-[60px] sm:max-w-[min(230px,56vw)] md:h-[66px]"
               priority
             />
-            <span className="fa-display hidden min-w-0 text-sm font-extrabold leading-tight tracking-tight text-neutral-900 lg:block lg:text-base">
-              <span className="line-clamp-2 xl:line-clamp-1">{dict.brand}</span>
-            </span>
           </Link>
 
-          <nav
-            className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 overflow-x-auto whitespace-nowrap px-1 [-ms-overflow-style:none] [scrollbar-width:none] md:flex lg:gap-1 [&::-webkit-scrollbar]:hidden"
-            aria-label="Main"
+          <a
+            href={`tel:${phoneTel.replace(/\s/g, "")}`}
+            className="hidden min-h-[42px] shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-rose-200 bg-white px-4 py-2 text-sm font-extrabold text-[#be123c] shadow-sm hover:bg-rose-50 lg:inline-flex"
           >
-            <Link className={`${navLinkClass} text-xs lg:text-sm`} href={`/${locale}`}>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.8.3 1.6.6 2.3a2 2 0 01-.4 2L8 9.4a16 16 0 006.6 6.6l1.4-1.3a2 2 0 012-.4c.7.3 1.5.5 2.3.6A2 2 0 0122 16.9z" />
+            </svg>
+            {displayPhone}
+          </a>
+          <div className="hidden min-h-[42px] min-w-0 shrink items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm xl:inline-flex">
+            <svg className="h-4 w-4 shrink-0 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path d="M12 21s7-4.5 7-11a7 7 0 10-14 0c0 6.5 7 11 7 11z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+            <span className="max-w-[18rem] truncate whitespace-nowrap text-sm font-bold text-slate-700">{displayAddress}</span>
+          </div>
+
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto whitespace-nowrap px-1 [-ms-overflow-style:none] [scrollbar-width:none] lg:flex lg:gap-2 [&::-webkit-scrollbar]:hidden" aria-label="Main">
+            <Link className={navLinkClass} href={`/${locale}`}>
               {dict.navHome}
             </Link>
             <Link
-              className={`${navLinkClass} hidden text-xs lg:inline lg:text-sm`}
+              className={navLinkClass}
               href={`/${locale}#programme`}
             >
               {dict.navProgramme}
             </Link>
             <Link
-              className={`${navLinkClass} hidden text-xs lg:inline lg:text-sm`}
+              className={navLinkClass}
               href={`/${locale}#audience`}
             >
               {dict.navAudience}
             </Link>
             <Link
-              className={`${navLinkClass} hidden text-xs lg:inline lg:text-sm`}
+              className={navLinkClass}
               href={`/${locale}#location`}
             >
               {dict.navLocation}
             </Link>
             <Link
-              className={`${navLinkClass} text-xs font-bold text-[#e11d48] hover:text-[#be123c] lg:text-sm`}
+              className={`${navLinkClass} font-black text-[#e11d48] hover:text-[#be123c]`}
               href={`/${locale}/reservation`}
             >
               {dict.navReserve}
             </Link>
           </nav>
 
-          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2.5">
             <div ref={langRef} className="relative z-[110]">
               <button
                 type="button"
                 onClick={() => setLangOpen((o) => !o)}
-                className="flex min-h-[44px] items-center gap-1.5 rounded-full border-2 border-violet-200/80 bg-gradient-to-r from-white to-violet-50/90 px-2.5 py-2 text-[11px] font-semibold text-violet-950 shadow-md shadow-violet-200/40 transition hover:border-violet-300 hover:shadow-lg sm:px-3 touch-manipulation [-webkit-tap-highlight-color:transparent]"
+                className="flex min-h-[46px] items-center gap-1.5 rounded-full border-2 border-rose-200/85 bg-gradient-to-r from-white to-rose-50/90 px-2.5 py-2 text-[11px] font-semibold text-slate-900 shadow-md shadow-rose-200/40 transition hover:border-rose-300 hover:shadow-lg sm:px-3.5 touch-manipulation [-webkit-tap-highlight-color:transparent]"
                 aria-haspopup="listbox"
                 aria-expanded={langOpen}
                 aria-label={dict.langMenuAria}
               >
                 <LocaleFlag code={locale} />
                 <span className="hidden max-w-[5.5rem] truncate sm:inline">{localeLabel(locale)}</span>
-                <span className="text-[9px] tabular-nums text-violet-600 sm:text-[10px]" aria-hidden>
+                <span className="text-[9px] tabular-nums text-rose-600 sm:text-[10px]" aria-hidden>
                   {langOpen ? "▲" : "▼"}
                 </span>
               </button>
               {langOpen ? (
                 <div
-                  className="absolute right-0 z-[120] mt-1.5 w-44 rounded-2xl border border-violet-200/90 bg-white/98 p-1 text-[11px] shadow-xl shadow-violet-200/50 backdrop-blur-md"
+                  className="absolute right-0 z-[120] mt-1.5 w-44 rounded-2xl border border-rose-200/90 bg-white/98 p-1 text-[11px] shadow-xl shadow-rose-200/50 backdrop-blur-md"
                   role="listbox"
                 >
                   {locales.map((l) => {
@@ -138,7 +153,7 @@ export function LocaleHeader({ locale, phoneTel }: Props) {
                     return (
                       <div key={l} role="option" aria-selected={active}>
                         {active ? (
-                          <span className="flex w-full items-center gap-2 rounded-xl bg-gradient-to-r from-violet-100 to-fuchsia-100 px-2.5 py-2 font-semibold text-violet-900">
+                          <span className="flex w-full items-center gap-2 rounded-xl bg-gradient-to-r from-rose-100 to-amber-100 px-2.5 py-2 font-semibold text-rose-900">
                             <LocaleFlag code={l} />
                             <span>{localeLabel(l)}</span>
                           </span>
@@ -146,7 +161,7 @@ export function LocaleHeader({ locale, phoneTel }: Props) {
                           <Link
                             href={pathForLocale(l)}
                             hrefLang={l}
-                            className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-slate-700 transition hover:bg-violet-50 hover:text-violet-900"
+                            className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-slate-700 transition hover:bg-rose-50 hover:text-rose-900"
                             onClick={() => setLangOpen(false)}
                           >
                             <LocaleFlag code={l} />
@@ -160,11 +175,11 @@ export function LocaleHeader({ locale, phoneTel }: Props) {
               ) : null}
             </div>
 
-            <span className="inline-block h-5 w-px shrink-0 bg-violet-200/90 md:hidden" aria-hidden />
+            <span className="inline-block h-5 w-px shrink-0 bg-rose-200/90 lg:hidden" aria-hidden />
 
             <button
               type="button"
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-rose-200/90 bg-white text-[#e11d48] shadow-sm md:hidden touch-manipulation [-webkit-tap-highlight-color:transparent]"
+              className="inline-flex min-h-[46px] min-w-[46px] items-center justify-center rounded-xl border border-rose-200/90 bg-white text-[#e11d48] shadow-sm lg:hidden touch-manipulation [-webkit-tap-highlight-color:transparent]"
               aria-expanded={menuOpen}
               aria-label={menuOpen ? dict.menuClose : dict.menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
@@ -178,7 +193,7 @@ export function LocaleHeader({ locale, phoneTel }: Props) {
 
         {menuOpen ? (
           <nav
-            className="absolute left-0 right-0 top-full z-[95] max-h-[min(70vh,520px)] overflow-y-auto overflow-x-hidden border-t border-rose-100 bg-white py-3 shadow-lg shadow-rose-100/50 md:hidden"
+            className="absolute left-0 right-0 top-full z-[95] max-h-[min(70vh,520px)] overflow-y-auto overflow-x-hidden border-t border-rose-100 bg-white py-3 shadow-lg shadow-rose-100/50 lg:hidden"
             aria-label="Mobile"
           >
             <div className="flex flex-col gap-0.5 px-2">
@@ -218,8 +233,11 @@ export function LocaleHeader({ locale, phoneTel }: Props) {
                 href={`tel:${phoneTel.replace(/\s/g, "")}`}
                 onClick={() => setMenuOpen(false)}
               >
-                {dict.heroCallUs}
+                {displayPhone}
               </a>
+              <div className="px-3 py-2.5 text-sm font-semibold text-slate-600">
+                {displayAddress}
+              </div>
             </div>
           </nav>
         ) : null}

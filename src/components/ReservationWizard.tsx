@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { DatePickerWithCalendar } from "@/components/DatePickerWithCalendar";
+import { CrossSellPromo } from "@/components/CrossSellPromo";
 import { ReservationSessionCard } from "@/components/ReservationSessionCard";
 import { ReservationStepper } from "@/components/ReservationStepper";
 import { api, type BookingEleve, type Lesson, type Session } from "@/lib/api";
@@ -230,6 +231,7 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
   return (
     <div className="w-full max-w-none rounded-3xl border border-rose-100 bg-white/95 p-4 shadow-xl shadow-rose-200/35 backdrop-blur-sm sm:p-6 md:p-8 lg:p-10">
       <ReservationStepper step={step} labels={stepLabels} />
+      <CrossSellPromo locale={locale} compact />
 
       {loadingLessons ? (
         <p className="text-slate-600">{dict.processing}</p>

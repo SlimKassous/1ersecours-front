@@ -28,33 +28,51 @@ export async function generateMetadata({
     },
     description: dict.heroSubtitle,
     metadataBase: new URL(siteUrl),
+    openGraph: {
+      type: "website",
+      locale: locale === "fr" ? "fr_CH" : "en_CH",
+      title: dict.browserTabTitle,
+      description: dict.heroSubtitle,
+      url: `/${locale}`,
+      siteName: "Success Driving School",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dict.browserTabTitle,
+      description: dict.heroSubtitle,
+    },
     alternates: {
+      canonical: `/${locale}`,
       languages: {
         fr: "/fr",
         en: "/en",
       },
     },
-    openGraph: {
-      type: "website",
-      locale: locale === "fr" ? "fr_CH" : "en_CH",
-    },
     keywords:
       locale === "fr"
         ? [
             "premiers secours",
+            "cours premiers secours geneve",
+            "formation samaritains geneve",
+            "attestation samaritains",
+            "cours samaritains permis geneve",
             "Geneve",
             "Samaritain",
             "OCV",
             "Success Driving",
-            "cours premiers secours",
+            "inscription en ligne premiers secours",
           ]
         : [
             "first aid",
+            "first aid course geneva",
+            "samaritan course geneva",
+            "driving licence first aid switzerland",
+            "first aid certificate geneva",
             "Geneva",
             "Samaritan",
             "OCV",
             "Success Driving",
-            "first aid course",
+            "online first aid booking",
           ],
   };
 }
@@ -92,8 +110,13 @@ export default async function LocaleLayout({
           className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-b from-rose-50/88 via-white/82 to-fuchsia-50/90"
           aria-hidden
         />
-        <LocaleHeader locale={locale} phoneTel={siteInfo.phone.phoneNumber} />
-        <div className="relative z-10 mx-auto flex w-full max-w-[min(100%,90rem)] flex-1 flex-col px-4 py-8 sm:px-5 sm:py-10 md:px-6 lg:px-8 md:py-12">
+        <LocaleHeader
+          locale={locale}
+          phoneTel={siteInfo.phone.phoneNumber}
+          phoneDisplay={siteInfo.phone.formattedPhoneNumber}
+          addressDisplay={primary?.rue ? `${primary.rue}${primary.ville ? `, ${primary.ville}` : ""}` : undefined}
+        />
+        <div className="relative z-10 mx-auto flex w-full max-w-[min(100%,100rem)] flex-1 flex-col px-4 pb-8 pt-[5.6rem] sm:px-5 sm:pb-10 sm:pt-[6.1rem] md:px-7 md:pb-12 md:pt-[6.4rem] lg:px-10 xl:px-12">
           {children}
           <SiteFooter
             locale={locale}

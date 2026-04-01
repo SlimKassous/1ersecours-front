@@ -52,7 +52,10 @@ type Props = {
 
 export function ReservationStepper({ step, labels }: Props) {
   return (
-    <nav aria-label="Progress" className="mb-8 w-full sm:mb-10 lg:px-2">
+    <nav
+      aria-label="Progress"
+      className="mb-8 w-full rounded-2xl border border-slate-200 bg-white px-2 py-4 shadow-sm sm:mb-10 sm:px-3 sm:py-5 lg:px-4"
+    >
       <div className="flex w-full min-w-0 items-center">
         {labels.map((label, i) => {
           const s = i as Step;
@@ -66,9 +69,9 @@ export function ReservationStepper({ step, labels }: Props) {
                   className={[
                     "mx-0.5 h-1 min-h-px min-w-[6px] flex-1 rounded-full transition-colors duration-300 sm:mx-1 sm:min-w-[12px]",
                     done
-                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-500/30"
+                      ? "bg-gradient-to-r from-[#10b981] to-[#14b8a6] shadow-sm shadow-emerald-500/30"
                       : active
-                        ? "bg-gradient-to-r from-rose-200 via-fuchsia-200 to-violet-200"
+                        ? "bg-gradient-to-r from-slate-200 to-slate-200"
                         : "bg-slate-200/90",
                   ].join(" ")}
                   aria-hidden
@@ -82,10 +85,10 @@ export function ReservationStepper({ step, labels }: Props) {
                   className={[
                     "flex h-11 w-11 items-center justify-center rounded-2xl border-2 transition-all duration-300 sm:h-[52px] sm:w-[52px] md:h-14 md:w-14 [transform:translateZ(0)]",
                     active
-                      ? "border-white/40 bg-gradient-to-br from-[#b827ce] via-[#e11d48] to-[#ff6b9d] text-white shadow-[0_12px_28px_rgba(184,39,206,0.38)] ring-2 ring-[#b827ce]/15"
+                      ? "border-white/40 bg-gradient-to-br from-[#e11d48] via-[#ec4899] to-[#8b5cf6] text-white shadow-[0_12px_28px_rgba(225,29,72,0.32)] ring-2 ring-[#e11d48]/15"
                       : done
                         ? "border-emerald-200/80 bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-[0_8px_22px_rgba(16,185,129,0.35)]"
-                        : "border-slate-200/90 bg-slate-100 text-slate-500 shadow-inner shadow-white/50",
+                        : "border-slate-200/90 bg-slate-50 text-slate-500 shadow-inner shadow-white/60",
                   ].join(" ")}
                 >
                   <Icon className="h-[1.15rem] w-[1.15rem] sm:h-5 sm:w-5 md:h-[1.35rem] md:w-[1.35rem]" />

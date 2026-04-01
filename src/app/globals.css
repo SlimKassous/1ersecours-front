@@ -7,7 +7,7 @@
   --fa-mauve: #8b5cf6;
   --fa-ink: #0b1229;
   --fa-muted: #475569;
-  --background: #fff5f7;
+  --background: #ffffff;
   --foreground: var(--fa-ink);
 }
 
@@ -25,7 +25,9 @@ html {
 }
 
 body {
-  background: var(--background);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ffffff 62%, #fff8fa 100%),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   overflow-x: clip;
