@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AddressLocationCards } from "@/components/AddressLocationCards";
-import { CrossSellPromo } from "@/components/CrossSellPromo";
 import { getFirstAidHeroPricing } from "@/lib/firstAidPricing";
 import { getDictionary, isLocale, type Locale } from "@/lib/i18n";
 import { loadSiteBootstrap } from "@/lib/siteBootstrap";
@@ -479,7 +478,6 @@ export default async function HomePage({
         </div>
       </section>
 
-      <CrossSellPromo locale={locale} />
     </div>
   );
 }

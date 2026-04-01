@@ -65,7 +65,7 @@ export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }:
     <header className="fixed left-0 right-0 top-0 z-[120] border-b border-rose-200/60 bg-white/95 shadow-md shadow-rose-200/25 backdrop-blur-md">
       <div className="relative mx-auto w-full max-w-[min(100%,100rem)] px-3 sm:px-5 md:px-7 lg:px-10 xl:px-12">
         {/* Logo à gauche, nav centrée (desktop), langue + menu à droite — comme ToolbarComponent mobile */}
-        <div className="flex min-h-[4rem] w-full min-w-0 items-center gap-2 py-2 md:min-h-[4.5rem] md:gap-3 md:py-2.5">
+        <div className="flex min-h-[3.5rem] w-full min-w-0 items-center gap-2 py-1.5 md:min-h-[4rem] md:gap-3 md:py-2">
           <Link
             href={`/${locale}`}
             className="flex min-w-0 shrink-0 items-center gap-2 rounded-xl p-1 pl-0 touch-manipulation [-webkit-tap-highlight-color:transparent] sm:gap-2.5 sm:p-1.5 sm:pl-0 md:gap-3"
@@ -75,7 +75,8 @@ export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }:
               alt="Success Driving School"
               width={200}
               height={60}
-              className="h-[54px] w-auto max-w-[min(210px,60vw)] shrink-0 object-contain object-left sm:h-[60px] sm:max-w-[min(230px,56vw)] md:h-[66px]"
+              className="h-[34px] w-auto max-w-[min(138px,42vw)] shrink-0 object-contain object-left sm:h-[40px] sm:max-w-[min(158px,44vw)] md:h-[46px]"
+              style={{ width: "auto", height: "auto" }}
               priority
             />
           </Link>

@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { DatePickerWithCalendar } from "@/components/DatePickerWithCalendar";
-import { CrossSellPromo } from "@/components/CrossSellPromo";
 import { ReservationSessionCard } from "@/components/ReservationSessionCard";
 import { ReservationStepper } from "@/components/ReservationStepper";
 import { api, type BookingEleve, type Lesson, type Session } from "@/lib/api";
@@ -38,6 +37,12 @@ function isDuplicateBookingMessage(msg: string): boolean {
     (m.includes("exist") && m.includes("reservation")) ||
     (m.includes("booking") && m.includes("today"))
   );
+}
+
+function formatBirthDateRecap(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return iso;
+  return `${m[3]}/${m[2]}/${m[1]}`;
 }
 
 export function ReservationWizard({ locale }: { locale: Locale }) {
@@ -231,7 +236,6 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
   return (
     <div className="w-full max-w-none rounded-3xl border border-rose-100 bg-white/95 p-4 shadow-xl shadow-rose-200/35 backdrop-blur-sm sm:p-6 md:p-8 lg:p-10">
       <ReservationStepper step={step} labels={stepLabels} />
-      <CrossSellPromo locale={locale} compact />
 
       {loadingLessons ? (
         <p className="text-slate-600">{dict.processing}</p>
@@ -464,115 +468,97 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
 
           {step === 2 && lesson && selectedSession ? (
             <div className="space-y-5 sm:space-y-6">
-              <h3 className="text-lg font-bold text-slate-900 sm:text-xl">{dict.recapTitle}</h3>
-              <div className="overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-br from-white via-rose-50/30 to-fuchsia-50/40 shadow-lg shadow-rose-100/40">
-                <div className="flex items-center gap-3 border-b border-rose-100/80 bg-white/60 px-5 py-3.5 backdrop-blur-sm">
-                  <span
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#b827ce] to-[#ff6b9d] text-white shadow-md shadow-rose-400/30 ring-2 ring-white/50"
-                    aria-hidden
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <path d="M16 2v4M8 2v4M3 10h18" />
-                    </svg>
-                  </span>
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#be123c]">
-                    {dict.recapSession}
-                  </p>
-                </div>
-                <div
-                  className={
-                    recapSessionFormatted.length > 1
-                      ? "grid gap-4 p-5 sm:gap-5 lg:grid-cols-2"
-                      : "space-y-4 p-5"
-                  }
-                >
-                  {recapSessionFormatted.length > 0 ? (
-                    recapSessionFormatted.map((p, idx) => (
-                      <div
-                        key={`recap-${idx}`}
-                        className="rounded-xl border border-rose-100/60 bg-white/90 p-4 shadow-sm sm:p-5"
-                      >
-                        <p className="fa-display border-b border-indigo-100 pb-2 text-sm font-extrabold text-[#667eea] sm:text-base">
-                          {p.title}
-                        </p>
-                        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
-                          <div className="rounded-lg bg-slate-50/95 px-3 py-2 ring-1 ring-slate-100">
-                            <p className="text-[10px] font-bold uppercase text-slate-500">{p.date.title}</p>
-                            <p className="mt-0.5 text-sm font-semibold text-slate-900">{p.date.value}</p>
-                          </div>
-                          <div className="rounded-lg bg-slate-50/95 px-3 py-2 ring-1 ring-slate-100">
-                            <p className="text-[10px] font-bold uppercase text-slate-500">{p.time.title}</p>
-                            <p className="mt-0.5 text-sm font-semibold text-slate-900">{p.time.value}</p>
-                          </div>
-                          <div className="rounded-lg bg-slate-50/95 px-3 py-2 ring-1 ring-slate-100 sm:col-span-1">
-                            <p className="text-[10px] font-bold uppercase text-slate-500">{p.location.title}</p>
-                            <p className="mt-0.5 break-words text-sm font-semibold text-slate-900">
-                              {p.location.value}
-                            </p>
-                          </div>
+              <h3 className="text-center text-2xl font-black text-[#b455cf] sm:text-3xl">{dict.stepRecap}</h3>
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
+                <div className="rounded-2xl border border-[#c9d7ef] bg-[#f8fbff] p-5 shadow-sm">
+                  <p className="text-center text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">{dict.selectCourse}</p>
+                  <p className="mt-2 text-center text-[1.75rem] leading-none" aria-hidden>🇨🇭</p>
+                  <p className="mt-2 text-center text-2xl font-black text-slate-800">{lesson.name}</p>
+
+                  <div className="my-5 h-px w-full bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
+
+                  <p className="text-center text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-600">{dict.recapParticipant}</p>
+                  <div className="mt-3 rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
+                    <div className="space-y-2.5 text-sm">
+                      <div className="flex items-center gap-2.5 rounded-lg bg-emerald-50/60 px-2.5 py-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500 text-white">•</span>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.firstName} / {dict.lastName}</p>
+                          <p className="font-extrabold text-slate-900">{user.prenom} {user.nom}</p>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <p className="whitespace-pre-wrap text-sm text-slate-700">
-                      {selectedSession.sessionDetails}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="overflow-hidden rounded-2xl border border-rose-100 bg-white shadow-md shadow-rose-100/30">
-                <div className="flex items-center gap-3 border-b border-rose-100/80 bg-gradient-to-r from-slate-50/90 to-white px-5 py-3.5">
-                  <span
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-md ring-2 ring-white/40"
-                    aria-hidden
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </span>
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-indigo-800/90">
-                    {dict.recapParticipant}
-                  </p>
-                </div>
-                <ul className="space-y-2 p-5 text-sm text-slate-700">
-                  <li>
-                    <span className="font-semibold text-slate-900">{user.prenom}</span>{" "}
-                    <span className="font-semibold text-slate-900">{user.nom}</span>
-                  </li>
-                  <li>{user.email}</li>
-                  <li>{user.telephone}</li>
-                  {user.adresse.trim() ? <li className="whitespace-pre-line">{user.adresse}</li> : null}
-                </ul>
-              </div>
-              <div className="flex flex-col gap-2 rounded-2xl border-2 border-[#f43f5e]/20 bg-gradient-to-br from-rose-50 via-white to-fuchsia-50/70 p-5 shadow-inner shadow-rose-100/50 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <span
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25"
-                    aria-hidden
-                  >
-                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <rect x="2" y="5" width="20" height="14" rx="2" />
-                      <path d="M2 10h20" />
-                    </svg>
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      {dict.recapPrice}
-                    </p>
-                    <p className="mt-0.5 text-sm font-medium text-slate-700">{lesson.name}</p>
+                      <div className="flex items-center gap-2.5 rounded-lg bg-blue-50/60 px-2.5 py-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500 text-white">@</span>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.email}</p>
+                          <p className="break-all font-bold text-slate-900">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5 rounded-lg bg-pink-50/60 px-2.5 py-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-pink-500 text-white">☎</span>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.phone}</p>
+                          <p className="font-bold text-slate-900">{user.telephone}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5 rounded-lg bg-green-50/60 px-2.5 py-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-green-500 text-white">📅</span>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.birthDate}</p>
+                          <p className="font-bold text-slate-900">{user.dateNaissance ? formatBirthDateRecap(user.dateNaissance) : "-"}</p>
+                        </div>
+                      </div>
+                      {user.adresse.trim() ? (
+                        <div className="flex items-center gap-2.5 rounded-lg bg-cyan-50/60 px-2.5 py-2">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-500 text-white">⌂</span>
+                          <div>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.address}</p>
+                            <p className="whitespace-pre-line font-bold text-slate-900">{user.adresse}</p>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="my-5 h-px w-full bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
+                  <p className="text-center text-[11px] font-bold uppercase tracking-[0.16em] text-violet-600">{dict.recapPrice}</p>
+                  <div className="mt-2 flex items-baseline justify-center gap-2">
+                    {priceDisplay.hasPromo ? (
+                      <span className="text-xl font-bold tabular-nums text-slate-400 line-through">{priceDisplay.listStr}</span>
+                    ) : null}
+                    <span className="fa-display text-5xl font-black tabular-nums text-[#b455cf]">{priceDisplay.payStr}</span>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-baseline gap-2 sm:text-right">
-                  {priceDisplay.hasPromo ? (
-                    <span className="text-base font-bold tabular-nums text-slate-400 line-through">
-                      {priceDisplay.listStr}
-                    </span>
-                  ) : null}
-                  <span className="fa-display text-2xl font-extrabold tabular-nums text-[#be123c] sm:text-3xl">
-                    {priceDisplay.payStr}
-                  </span>
+
+                <div className="rounded-2xl border border-[#c9d7ef] bg-[#f8fbff] p-5 shadow-sm">
+                  <p className="text-center text-[11px] font-bold uppercase tracking-[0.16em] text-blue-700">{dict.recapSession}</p>
+                  <div className="mt-3 space-y-3">
+                    {recapSessionFormatted.length > 0 ? (
+                      recapSessionFormatted.map((p, idx) => (
+                        <div key={`recap-${idx}`} className="rounded-xl border border-[#c9d7ef] bg-white p-3.5 shadow-sm">
+                          <p className="rounded-lg bg-blue-600 px-3 py-1.5 text-center text-xs font-extrabold uppercase tracking-wide text-white">
+                            {p.title}
+                          </p>
+                          <div className="mt-2 space-y-2">
+                            <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                              <span className="font-bold text-slate-500">{p.date.title}: </span>
+                              {p.date.value}
+                            </div>
+                            <div className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                              <span className="font-bold text-slate-500">{p.time.title}: </span>
+                              {p.time.value}
+                            </div>
+                            <div className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                              <span className="font-bold text-slate-500">{p.location.title}: </span>
+                              <span className="break-words">{p.location.value}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="whitespace-pre-wrap text-sm text-slate-700">{selectedSession.sessionDetails}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

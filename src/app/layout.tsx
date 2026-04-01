@@ -50,6 +50,7 @@ export default function RootLayout({
     <html
       lang="fr"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full scroll-smooth antialiased`}
     >
       <body className="min-h-full min-h-dvh flex flex-col overflow-x-clip font-sans">
