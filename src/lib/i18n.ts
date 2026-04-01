@@ -138,7 +138,7 @@ export const dictionary = {
     reservationTitle: "Reservation de cours",
     reservationCancelHome: "Retour a l'accueil",
     reservationSubtitle:
-      "Quatre etapes : session, coordonnees, recapitulatif, paiement — carte Stripe ou code (API identique au site principal).",
+      "Quatre etapes : session, coordonnees, recapitulatif, paiement — carte Stripe securisee.",
     chooseSession: "Choisir une session",
     yourInfo: "Vos informations",
     paymentMethod: "Mode de paiement",
@@ -320,7 +320,7 @@ export const dictionary = {
     reservationTitle: "Course booking",
     reservationCancelHome: "Back to home",
     reservationSubtitle:
-      "Four steps: session, your details, summary, payment — Stripe card or reservation code (same API as the main site).",
+      "Four steps: session, your details, summary, payment - secure Stripe card checkout.",
     chooseSession: "Choose a session",
     yourInfo: "Your details",
     paymentMethod: "Payment method",
