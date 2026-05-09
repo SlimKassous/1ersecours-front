@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NEXT_TEST_WASM=1 next dev --webpack",
-    "build": "cross-env NEXT_TEST_WASM=1 next build --webpack",
-    "start": "cross-env NEXT_TEST_WASM=1 next dev --webpack",
-    "start:prod": "cross-env NEXT_TEST_WASM=1 next start",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next dev --webpack",
+    "start:prod": "next start",
     "lint": "eslint"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
     "react": "19.2.4",
     "react-calendar": "^6.0.0",
     "react-dom": "19.2.4",
+    "react-flag-kit": "^1.1.1",
     "sonner": "^2.0.7"
   },
   "devDependencies": {

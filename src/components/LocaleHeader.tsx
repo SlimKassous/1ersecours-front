@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocaleFlag } from "@/components/LocaleFlag";
 import type { Locale } from "@/lib/i18n";
 import { getDictionary, locales } from "@/lib/i18n";
@@ -23,29 +24,10 @@ export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }:
   const dict = getDictionary(locale);
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
-  const langRef = useRef<HTMLDivElement>(null);
-
-  const pathForLocale = (l: Locale) =>
-    pathname?.replace(`/${locale}`, `/${l}`) ?? `/${l}`;
-
-  const localeLabel = (l: Locale) => (l === "fr" ? dict.localeLabelFr : dict.localeLabelEn);
 
   useEffect(() => {
     setMenuOpen(false);
-    setLangOpen(false);
   }, [pathname]);
-
-  useEffect(() => {
-    if (!langOpen) return;
-    const onDoc = (e: MouseEvent) => {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) {
-        setLangOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [langOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -129,52 +111,7 @@ export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }:
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2.5">
-            <div ref={langRef} className="relative z-[110]">
-              <button
-                type="button"
-                onClick={() => setLangOpen((o) => !o)}
-                className="flex min-h-[46px] items-center gap-1.5 rounded-full border-2 border-rose-200/85 bg-gradient-to-r from-white to-rose-50/90 px-2.5 py-2 text-[11px] font-semibold text-slate-900 shadow-md shadow-rose-200/40 transition hover:border-rose-300 hover:shadow-lg sm:px-3.5 touch-manipulation [-webkit-tap-highlight-color:transparent]"
-                aria-haspopup="listbox"
-                aria-expanded={langOpen}
-                aria-label={dict.langMenuAria}
-              >
-                <LocaleFlag code={locale} />
-                <span className="hidden max-w-[5.5rem] truncate sm:inline">{localeLabel(locale)}</span>
-                <span className="text-[9px] tabular-nums text-rose-600 sm:text-[10px]" aria-hidden>
-                  {langOpen ? "▲" : "▼"}
-                </span>
-              </button>
-              {langOpen ? (
-                <div
-                  className="absolute right-0 z-[120] mt-1.5 w-44 rounded-2xl border border-rose-200/90 bg-white/98 p-1 text-[11px] shadow-xl shadow-rose-200/50 backdrop-blur-md"
-                  role="listbox"
-                >
-                  {locales.map((l) => {
-                    const active = l === locale;
-                    return (
-                      <div key={l} role="option" aria-selected={active}>
-                        {active ? (
-                          <span className="flex w-full items-center gap-2 rounded-xl bg-gradient-to-r from-rose-100 to-amber-100 px-2.5 py-2 font-semibold text-rose-900">
-                            <LocaleFlag code={l} />
-                            <span>{localeLabel(l)}</span>
-                          </span>
-                        ) : (
-                          <Link
-                            href={pathForLocale(l)}
-                            hrefLang={l}
-                            className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-slate-700 transition hover:bg-rose-50 hover:text-rose-900"
-                            onClick={() => setLangOpen(false)}
-                          >
-                            <LocaleFlag code={l} />
-                            <span>{localeLabel(l)}</span>
-                          </Link>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
+            <LanguageSwitcher locale={locale} />
 
             <span className="inline-block h-5 w-px shrink-0 bg-rose-200/90 lg:hidden" aria-hidden />
 
