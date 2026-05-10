@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { Locale } from "@/lib/i18n";

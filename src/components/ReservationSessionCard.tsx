@@ -10,6 +10,7 @@ import type { Locale } from "@/lib/i18n";
 type Props = {
   session: Session;
   locale: Locale;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dict: Record<string, any>;
   selected: boolean;
   disabled: boolean;

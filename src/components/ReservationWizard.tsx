@@ -101,9 +101,7 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
   const [prevLessonId, setPrevLessonId] = useState(lessonId);
     if (lessonId !== prevLessonId) {
     setPrevLessonId(lessonId);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSessions([]);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedSession(null);
   }
 

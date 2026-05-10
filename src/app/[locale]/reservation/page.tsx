@@ -34,7 +34,7 @@ export default async function ReservationPage({
   const { locale: param } = await params;
   if (!isLocale(param)) notFound();
   const locale = param as Locale;
-  const dict = getDictionary(locale);
+
 
   return (
     <div className="w-full min-w-0 max-w-none">
