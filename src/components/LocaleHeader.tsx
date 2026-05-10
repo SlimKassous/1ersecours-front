@@ -50,6 +50,12 @@ export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }:
         <div className="flex min-h-[3.5rem] w-full min-w-0 items-center gap-2 py-1.5 md:min-h-[4rem] md:gap-3 md:py-2">
           <Link
             href={`/${locale}`}
+            onClick={(e) => {
+              if (pathname === `/${locale}` || pathname === `/${locale}/`) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
             className="flex min-w-0 shrink-0 items-center gap-2 rounded-xl p-1 pl-0 touch-manipulation [-webkit-tap-highlight-color:transparent] sm:gap-2.5 sm:p-1.5 sm:pl-0 md:gap-3"
           >
             <Image
@@ -81,7 +87,16 @@ export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }:
           </div>
 
           <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto whitespace-nowrap px-1 [-ms-overflow-style:none] [scrollbar-width:none] lg:flex lg:gap-2 [&::-webkit-scrollbar]:hidden" aria-label="Main">
-            <Link className={navLinkClass} href={`/${locale}`}>
+            <Link 
+              className={navLinkClass} 
+              href={`/${locale}`}
+              onClick={(e) => {
+                if (pathname === `/${locale}` || pathname === `/${locale}/`) {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
+            >
               {dict.navHome}
             </Link>
             <Link
@@ -135,7 +150,17 @@ export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }:
             aria-label="Mobile"
           >
             <div className="flex flex-col gap-0.5 px-2">
-              <Link className={navLinkClass} href={`/${locale}`} onClick={() => setMenuOpen(false)}>
+              <Link 
+                className={navLinkClass} 
+                href={`/${locale}`} 
+                onClick={(e) => {
+                  setMenuOpen(false);
+                  if (pathname === `/${locale}` || pathname === `/${locale}/`) {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
+              >
                 {dict.navHome}
               </Link>
               <Link

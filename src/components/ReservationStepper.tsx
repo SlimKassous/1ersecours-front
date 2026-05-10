@@ -54,7 +54,7 @@ export function ReservationStepper({ step, labels }: Props) {
   return (
     <nav
       aria-label="Progress"
-      className="mb-8 w-full rounded-2xl border border-slate-200 bg-white px-2 py-4 shadow-sm sm:mb-10 sm:px-3 sm:py-5 lg:px-4"
+      className="w-full rounded-[20px] border border-[rgba(255,255,255,0.8)] bg-[rgba(255,255,255,0.98)] px-[16px] py-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.1),0_2px_8px_rgba(138,43,226,0.1)] backdrop-blur-[10px] sm:rounded-[12px] sm:px-[8px] sm:py-[16px]"
     >
       <div className="flex w-full min-w-0 items-center">
         {labels.map((label, i) => {
@@ -69,10 +69,8 @@ export function ReservationStepper({ step, labels }: Props) {
                   className={[
                     "mx-0.5 h-1 min-h-px min-w-[6px] flex-1 rounded-full transition-colors duration-300 sm:mx-1 sm:min-w-[12px]",
                     done
-                      ? "bg-gradient-to-r from-[#10b981] to-[#14b8a6] shadow-sm shadow-emerald-500/30"
-                      : active
-                        ? "bg-gradient-to-r from-slate-200 to-slate-200"
-                        : "bg-slate-200/90",
+                      ? "bg-[#10b981]"
+                      : "bg-[#e2e8f0]",
                   ].join(" ")}
                   aria-hidden
                 />
@@ -83,20 +81,33 @@ export function ReservationStepper({ step, labels }: Props) {
               >
                 <div
                   className={[
-                    "flex h-11 w-11 items-center justify-center rounded-2xl border-2 transition-all duration-300 sm:h-[52px] sm:w-[52px] md:h-14 md:w-14 [transform:translateZ(0)]",
+                    "flex h-11 w-11 items-center justify-center rounded-[16px] border-[2px] border-[rgba(255,255,255,0.3)] transition-all duration-[400ms] sm:h-[48px] sm:w-[48px] md:h-[56px] md:w-[56px] [transform-style:preserve-3d]",
                     active
-                      ? "border-white/40 bg-gradient-to-br from-[#e11d48] via-[#ec4899] to-[#8b5cf6] text-white shadow-[0_12px_28px_rgba(225,29,72,0.32)] ring-2 ring-[#e11d48]/15"
+                      ? "animate-[pulse_2s_ease-in-out_infinite] border-[rgba(255,255,255,0.4)] text-white"
                       : done
-                        ? "border-emerald-200/80 bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-[0_8px_22px_rgba(16,185,129,0.35)]"
-                        : "border-slate-200/90 bg-slate-50 text-slate-500 shadow-inner shadow-white/60",
+                        ? "text-white shadow-[0_8px_24px_rgba(16,185,129,0.3),inset_0_2px_4px_rgba(255,255,255,0.3)] [transform:perspective(1000px)_rotateY(0deg)]"
+                        : "bg-[#e2e8f0] text-[#64748b] shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] [transform:perspective(1000px)_rotateY(0deg)]",
                   ].join(" ")}
+                  style={{
+                    background: active
+                      ? "linear-gradient(135deg, #b827ce 0%, #ff6b9d 100%)"
+                      : done
+                        ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                        : "#e2e8f0",
+                    boxShadow: active
+                      ? "0 12px 32px rgba(184, 39, 206, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 0 0 4px rgba(184, 39, 206, 0.1)"
+                      : undefined,
+                    transform: active
+                      ? "perspective(1000px) rotateY(-5deg) rotateX(5deg) scale(1.05)"
+                      : undefined,
+                  }}
                 >
-                  <Icon className="h-[1.15rem] w-[1.15rem] sm:h-5 sm:w-5 md:h-[1.35rem] md:w-[1.35rem]" />
+                  <Icon className="h-[1.15rem] w-[1.15rem] sm:h-[1.2rem] sm:w-[1.2rem] md:h-[1.5rem] md:w-[1.5rem]" />
                 </div>
                 <span
                   className={[
-                    "max-w-full px-0.5 text-center text-[8px] font-bold uppercase leading-tight tracking-[0.06em] sm:text-[9px] sm:tracking-[0.1em] md:text-[10px]",
-                    active ? "text-[#9f1239]" : done ? "text-emerald-800" : "text-slate-400",
+                    "max-w-full px-0.5 text-center text-[0.6rem] sm:text-[0.65rem] md:text-[1rem] leading-[1.25] text-wrap break-words",
+                    active ? "font-[800] text-[#667eea]" : done ? "font-[700] text-[#10b981]" : "font-[700] text-[#1e293b]",
                   ].join(" ")}
                 >
                   {label}

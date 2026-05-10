@@ -15,22 +15,129 @@ import "react-calendar/dist/Calendar.css";
 
 import type { Locale } from "@/lib/i18n";
 
-function usePreferNativeDatePicker(): boolean {
-  const [preferNative, setPreferNative] = useState(false);
+type DatePickerMode = "desktop" | "iosNative" | "androidWheel";
+
+function useDatePickerMode(): DatePickerMode {
+  const [mode, setMode] = useState<DatePickerMode>("desktop");
+
   useEffect(() => {
-    if (typeof navigator === "undefined" || typeof window === "undefined") return;
-    const ua = (navigator.userAgent || "").toLowerCase();
-    const isMobileUa = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-      ua,
-    );
-    const hasTouch = navigator.maxTouchPoints > 0 || "ontouchstart" in window;
-    const coarsePointer =
+    if (typeof window === "undefined" || typeof navigator === "undefined") return;
+
+    const compute = () => {
+      const ua = (navigator.userAgent || "").toLowerCase();
+      const isAndroid = /android/i.test(ua);
+      const isIos = /iphone|ipad|ipod/i.test(ua);
+      const narrow =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(max-width:599.98px)").matches;
+
+      if (isAndroid) {
+        setMode("androidWheel");
+        return;
+      }
+      if (isIos) {
+        setMode("iosNative");
+        return;
+      }
+      if (narrow) {
+        setMode("iosNative");
+        return;
+      }
+      setMode("desktop");
+    };
+
+    compute();
+
+    const mq =
       typeof window.matchMedia === "function"
-        ? window.matchMedia("(pointer: coarse)").matches
-        : false;
-    setPreferNative(isMobileUa || (hasTouch && coarsePointer));
+        ? window.matchMedia("(max-width:599.98px)")
+        : null;
+    const onMq = () => compute();
+    mq?.addEventListener?.("change", onMq);
+    window.addEventListener("resize", compute);
+    return () => {
+      mq?.removeEventListener?.("change", onMq);
+      window.removeEventListener("resize", compute);
+    };
   }, []);
-  return preferNative;
+
+  return mode;
+}
+
+
+const WHEEL_ITEM_HEIGHT = 44;
+const WHEEL_PAD = 88;
+
+interface WheelScrollColumnProps {
+  values: number[];
+  renderLabel: (v: number) => string;
+  selected: number;
+  onSelect: (v: number) => void;
+  columnClass: string;
+  itemClass: string;
+}
+
+function WheelScrollColumn({
+  values,
+  renderLabel,
+  selected,
+  onSelect,
+  columnClass,
+  itemClass,
+}: WheelScrollColumnProps) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const debounceRef = useRef<number | undefined>();
+
+  const scrollToValue = useCallback(
+    (v: number) => {
+      const idx = values.indexOf(v);
+      if (ref.current && idx >= 0) {
+        ref.current.scrollTop = idx * WHEEL_ITEM_HEIGHT;
+      }
+    },
+    [values]
+  );
+
+  useEffect(() => {
+    requestAnimationFrame(() => scrollToValue(selected));
+  }, [selected, values, scrollToValue]);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(debounceRef.current);
+    },
+    []
+  );
+
+  const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    
+    window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => {
+      const idx = Math.round(el.scrollTop / WHEEL_ITEM_HEIGHT);
+      const clamped = Math.max(0, Math.min(values.length - 1, idx));
+      const next = values[clamped];
+      
+      if (next !== undefined && next !== selected) {
+        onSelect(next);
+      }
+      
+      // Force alignment to middle of snap
+      el.scrollTo({ top: clamped * WHEEL_ITEM_HEIGHT, behavior: 'smooth' });
+    }, 150);
+  };
+
+  return (
+    <div ref={ref} className={columnClass} onScroll={onScroll}>
+      <div style={{ paddingTop: WHEEL_PAD, paddingBottom: WHEEL_PAD }}>
+        {values.map((v) => (
+          <div key={v} className={itemClass}>
+            {renderLabel(v)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 type Props = {
@@ -65,7 +172,7 @@ export function DatePickerWithCalendar({
   const isEnglish = locale === "en";
   const dateFormat = isEnglish ? "DD-MM-YYYY" : "JJ-MM-AAAA";
   const separator = "-";
-  const preferNative = usePreferNativeDatePicker();
+  const datePickerMode = useDatePickerMode();
   const nativeInputRef = useRef<HTMLInputElement | null>(null);
   const anchorFieldRef = useRef<HTMLDivElement | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
@@ -398,6 +505,114 @@ export function DatePickerWithCalendar({
     applyConstraintsAndEmit(year, month, day);
   };
 
+
+  const isDateAllowed = useCallback(
+    (y: number, m: number, d: number): boolean => {
+      if (!isValidCalendarDate(d, m, y)) return false;
+      const candidate = new Date(y, m - 1, d);
+      candidate.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (disableFuture && candidate > today) return false;
+      if (disablePast && candidate < today) return false;
+      if (minYear && y < minYear) return false;
+      if (maxYear && y > maxYear) return false;
+      return true;
+    },
+    [disableFuture, disablePast, minYear, maxYear]
+  );
+
+  const getAllowedDays = useCallback(
+    (y: number, m: number) => {
+      const maxD = getDaysInMonth(y, m);
+      const out: number[] = [];
+      for (let d = 1; d <= maxD; d++) {
+        if (isDateAllowed(y, m, d)) out.push(d);
+      }
+      return out.length ? out : [1];
+    },
+    [isDateAllowed]
+  );
+
+  const getAllowedMonths = useCallback(
+    (y: number) => {
+      const out: number[] = [];
+      for (let m = 1; m <= 12; m++) {
+        const maxD = getDaysInMonth(y, m);
+        let hasValid = false;
+        for (let d = 1; d <= maxD; d++) {
+          if (isDateAllowed(y, m, d)) {
+            hasValid = true;
+            break;
+          }
+        }
+        if (hasValid) out.push(m);
+      }
+      return out.length ? out : [new Date().getMonth() + 1];
+    },
+    [isDateAllowed]
+  );
+
+  const [wheelOpen, setWheelOpen] = useState(false);
+  const [wheelDay, setWheelDay] = useState(1);
+  const [wheelMonth, setWheelMonth] = useState(1);
+  const [wheelYear, setWheelYear] = useState(() => new Date().getFullYear());
+
+  const syncWheelFrom = useCallback(
+    (y: number, m: number, d: number) => {
+      const yOpts = yearOptions;
+      const yy = yOpts.includes(y) ? y : yOpts[0];
+      const mo = getAllowedMonths(yy);
+      const mm = mo.includes(m) ? m : mo[0];
+      const days = getAllowedDays(yy, mm);
+      const dd = days.includes(d) ? d : days[days.length - 1];
+      setWheelYear(yy);
+      setWheelMonth(mm);
+      setWheelDay(dd);
+    },
+    [yearOptions, getAllowedMonths, getAllowedDays]
+  );
+
+  const openAndroidWheel = () => {
+    if (disabled) return;
+    setInvalidDateError('');
+    let y = 0;
+    let m = 0;
+    let d = 0;
+    if (value) {
+      const p = value.split('-').map((x) => parseInt(x, 10));
+      if (p.length === 3 && !p.some(Number.isNaN) && isDateAllowed(p[0], p[1], p[2])) {
+        y = p[0];
+        m = p[1];
+        d = p[2];
+      }
+    }
+    if (!y) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const base = computedMinDate && computedMinDate > today ? computedMinDate : today;
+      y = base.getFullYear();
+      m = base.getMonth() + 1;
+      d = base.getDate();
+    }
+    syncWheelFrom(y, m, d);
+    setWheelOpen(true);
+  };
+
+  const handleWheelConfirm = () => {
+    const ok = applyConstraintsAndEmit(wheelYear, wheelMonth, wheelDay);
+    if (ok) setWheelOpen(false);
+  };
+
+  const wheelDayOptions = useMemo(
+    () => getAllowedDays(wheelYear, wheelMonth),
+    [wheelYear, wheelMonth, getAllowedDays]
+  );
+  const wheelMonthOptions = useMemo(
+    () => getAllowedMonths(wheelYear),
+    [wheelYear, getAllowedMonths]
+  );
+
   const openNativePicker = () => {
     const input = nativeInputRef.current;
     if (!input) return;
@@ -411,7 +626,8 @@ export function DatePickerWithCalendar({
 
   const openPickerFromButton = () => {
     if (disabled) return;
-    if (preferNative) openNativePicker();
+    if (datePickerMode === "iosNative") openNativePicker();
+    else if (datePickerMode === "androidWheel") openAndroidWheel();
     else openDesktopPicker();
   };
 
@@ -419,9 +635,9 @@ export function DatePickerWithCalendar({
     ? "8 digits (DDMMYYYY) — dashes appear as you type."
     : "8 chiffres (JJMMAAAA) — tirets ajoutés automatiquement.";
   const mobileHint = isEnglish
-    ? "Select a date from the native calendar."
-    : "Selectionnez une date via le calendrier natif.";
-  const resolvedHelper = invalidDateError || helperText || (preferNative ? mobileHint : manualHint);
+    ? (datePickerMode === "androidWheel" ? "Select a date from the wheel picker." : "Select a date from the native calendar.")
+    : (datePickerMode === "androidWheel" ? "Choisissez une date via la roue de sélection." : "Selectionnez une date via le calendrier natif.");
+  const resolvedHelper = invalidDateError || helperText || (datePickerMode !== "desktop" ? mobileHint : manualHint);
   const hasErr = Boolean(error || invalidDateError);
 
   const calendarIcon = (
@@ -443,7 +659,8 @@ export function DatePickerWithCalendar({
     </button>
   );
 
-  if (preferNative) {
+
+  if (datePickerMode === "iosNative") {
     return (
       <div className="relative w-full">
         <input
@@ -456,6 +673,22 @@ export function DatePickerWithCalendar({
           max={maxDateNative}
           aria-hidden
           tabIndex={-1}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 0,
+            cursor: 'pointer',
+            zIndex: 20,
+            border: 'none',
+            padding: 0,
+            margin: 0,
+            WebkitTapHighlightColor: 'transparent',
+          }}
         />
         <div
           className={`flex w-full items-stretch gap-1 rounded-xl border-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-violet-200 ${
@@ -473,12 +706,108 @@ export function DatePickerWithCalendar({
             onBlur={onBlur}
             placeholder={dateFormat}
             className={`min-h-[48px] flex-1 rounded-l-[10px] border-0 bg-transparent px-3 py-2.5 text-sm text-slate-900 outline-none ${hasErr ? "text-red-700" : ""}`}
+            style={{ cursor: "pointer" }}
           />
           <div className="flex items-center pr-1">{calendarIcon}</div>
         </div>
         <p className={`mt-1.5 text-xs ${hasErr ? "text-red-600" : "text-slate-500"}`}>
           {resolvedHelper}
         </p>
+      </div>
+    );
+  }
+
+  if (datePickerMode === "androidWheel") {
+    return (
+      <div className="relative w-full">
+        <div
+          className="absolute inset-0 z-10 cursor-pointer bg-transparent"
+          style={{ WebkitTapHighlightColor: "transparent" }}
+          onClick={() => !disabled && openAndroidWheel()}
+        />
+        <div
+          className={`flex w-full items-stretch gap-1 rounded-xl border-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-violet-200 ${
+            hasErr
+              ? "border-red-400 focus-within:border-red-500"
+              : "border-[rgba(138,43,226,0.3)] focus-within:border-[rgba(138,43,226,0.7)]"
+          }`}
+        >
+          <input
+            type="text"
+            readOnly
+            disabled={disabled}
+            value={textValue}
+            placeholder={dateFormat}
+            className={`min-h-[48px] flex-1 rounded-l-[10px] border-0 bg-transparent px-3 py-2.5 text-sm text-slate-900 outline-none ${hasErr ? "text-red-700" : ""}`}
+            style={{ cursor: "pointer" }}
+          />
+          <div className="flex items-center pr-1 relative z-20" onClick={(e) => { e.stopPropagation(); if (!disabled) openAndroidWheel(); }}>{calendarIcon}</div>
+        </div>
+        <p className={`mt-1.5 text-xs ${hasErr ? "text-red-600" : "text-slate-500"}`}>
+          {resolvedHelper}
+        </p>
+
+        {wheelOpen && typeof document !== "undefined" && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm transition-opacity">
+            <div className="w-full max-w-[420px] overflow-hidden rounded-[30px] border border-white/40 bg-white/95 shadow-[0_25px_50px_-12px_rgba(91,33,182,0.25),0_15px_35px_rgba(0,0,0,0.1)] backdrop-blur-md">
+              <div className="bg-gradient-to-br from-[#6366f1] via-[#8b5cf6] to-[#d946ef] px-6 py-4 text-center text-[1.2rem] font-black tracking-tight text-white shadow-[0_4px_12px_rgba(139,92,246,0.2)]">
+                {isEnglish ? 'Select date' : 'Choisir une date'}
+              </div>
+              <div className="bg-white p-2">
+                <div className="relative mx-auto flex h-[220px] w-full flex-row items-stretch overflow-hidden rounded-[20px] border border-violet-200/40 bg-white shadow-inner">
+                  <div className="pointer-events-none absolute inset-x-1 top-1/2 z-[1] -mt-[22px] h-[44px] rounded-[14px] border border-violet-500/30 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/5 shadow-[0_8px_20px_-6px_rgba(139,92,246,0.25)]" />
+                  
+                  <WheelScrollColumn
+                    key={`wheel-day-${wheelYear}-${wheelMonth}`}
+                    values={wheelDayOptions}
+                    selected={wheelDay}
+                    onSelect={(d) => setWheelDay(d)}
+                    renderLabel={(v) => String(v).padStart(2, '0')}
+                    columnClass="flex-1 min-w-0 h-[220px] overflow-y-auto px-0.5 snap-y snap-mandatory touch-pan-y scrollbar-hide"
+                    itemClass="flex h-[44px] min-h-[44px] items-center justify-center text-[1.15rem] font-bold text-slate-600 snap-center capitalize transition-colors hover:text-violet-600"
+                  />
+                  <div className="h-[70%] w-px self-center bg-gradient-to-b from-transparent via-violet-500/20 to-transparent" />
+                  <WheelScrollColumn
+                    key={`wheel-month-${wheelYear}`}
+                    values={wheelMonthOptions}
+                    selected={wheelMonth}
+                    onSelect={(m) => syncWheelFrom(wheelYear, m, wheelDay)}
+                    renderLabel={(m) => monthLabels[m - 1] ?? String(m)}
+                    columnClass="flex-1 min-w-0 h-[220px] overflow-y-auto px-0.5 snap-y snap-mandatory touch-pan-y scrollbar-hide"
+                    itemClass="flex h-[44px] min-h-[44px] items-center justify-center text-[1.15rem] font-bold text-slate-600 snap-center capitalize transition-colors hover:text-violet-600"
+                  />
+                  <div className="h-[70%] w-px self-center bg-gradient-to-b from-transparent via-violet-500/20 to-transparent" />
+                  <WheelScrollColumn
+                    key="wheel-year"
+                    values={yearOptions}
+                    selected={wheelYear}
+                    onSelect={(y) => syncWheelFrom(y, wheelMonth, wheelDay)}
+                    renderLabel={(y) => String(y)}
+                    columnClass="flex-1 min-w-0 h-[220px] overflow-y-auto px-0.5 snap-y snap-mandatory touch-pan-y scrollbar-hide"
+                    itemClass="flex h-[44px] min-h-[44px] items-center justify-center text-[1.15rem] font-bold text-slate-600 snap-center capitalize transition-colors hover:text-violet-600"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between border-t border-slate-400/15 bg-white px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() => setWheelOpen(false)}
+                  className="rounded-xl px-6 py-2 text-[0.95rem] font-bold text-slate-500 transition-colors hover:bg-slate-400/10"
+                >
+                  {isEnglish ? 'Cancel' : 'Annuler'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleWheelConfirm}
+                  className="rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 px-6 py-2 text-[0.95rem] font-bold text-white shadow-[0_4px_12px_rgba(99,102,241,0.3)] transition-all hover:-translate-y-px hover:shadow-[0_6px_16px_rgba(99,102,241,0.4)]"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
       </div>
     );
   }

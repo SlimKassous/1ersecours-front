@@ -12,11 +12,9 @@ import type { Locale } from "@/lib/i18n";
 type Props = {
   session: Session;
   locale: Locale;
+  dict: any;
   selected: boolean;
   disabled: boolean;
-  spotsLabel: string;
-  noSpotsLabel: string;
-  mapsLinkTitle: string;
   onPick: () => void;
 };
 
@@ -45,21 +43,19 @@ function IconMap({ className }: { className?: string }) {
 }
 
 /**
- * Carte session alignée sur ReservationCourse.tsx (Grid xs=12 sm=6 md=4, minHeight ~700px, styles inline reproduits).
+ * Carte session alignée sur ReservationCourse.tsx
  */
 export function ReservationSessionCard({
   session,
   locale,
+  dict,
   selected,
   disabled,
-  spotsLabel,
-  noSpotsLabel,
-  mapsLinkTitle,
   onPick,
 }: Props) {
   const formattedDetails = formatSessionDetails(session.sessionDetails, locale);
   const monthYear = getMonthYearFromSessionDetails(session.sessionDetails, locale);
-  const minHeight = formattedDetails.length === 3 ? "auto" : "700px";
+  const minHeight = formattedDetails.length >= 3 ? "620px" : "auto";
 
   return (
     <button
@@ -68,14 +64,14 @@ export function ReservationSessionCard({
       onClick={() => !disabled && onPick()}
       style={{ minHeight }}
       className={[
-        "group relative w-full cursor-pointer overflow-hidden rounded-[20px] border-2 p-[25px] text-left backdrop-blur-[10px] transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] touch-manipulation",
-        "flex h-full min-h-0 flex-col bg-gradient-to-br from-white to-[#f8fafc]",
-        "shadow-[0_10px_30px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.1)]",
+        "group relative w-full cursor-pointer overflow-hidden rounded-[24px] border-[3px] p-[24px] px-[20px] text-left backdrop-blur-[10px] transition-all duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,1.275)] touch-manipulation",
+        "flex h-full min-h-0 flex-col bg-[#ffffff]",
+        selected ? "border-[#667eea]" : "border-[#5b21b6]",
         disabled
           ? "cursor-not-allowed border-[#ccc] bg-gradient-to-br from-[#f5f5f5] to-[#e8e8e8] opacity-60 shadow-[0_5px_15px_rgba(0,0,0,0.1)]"
           : selected
-            ? "border-[3px] border-[#667eea] bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white shadow-[0_20px_40px_rgba(102,126,234,0.4),0_0_0_1px_rgba(255,255,255,0.1)] [transform:translateY(-8px)]"
-            : "border-[rgba(102,126,234,0.3)] hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(59,130,246,0.2)]",
+            ? "shadow-[0_20px_40px_rgba(102,126,234,0.4),0_0_0_1px_rgba(255,255,255,0.1)] [transform:translateY(-8px)]"
+            : "shadow-[0_4px_20px_rgba(91,33,182,0.15)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(91,33,182,0.3)]",
       ].join(" ")}
     >
       <div
@@ -91,200 +87,318 @@ export function ReservationSessionCard({
 
       <div className="relative z-[1] flex h-full min-h-0 flex-1 flex-col">
         <h3
-          className="mb-5 text-center text-[20px] font-extrabold uppercase tracking-[2px]"
+          className="mb-4 text-center text-[18px] font-extrabold uppercase tracking-[1px]"
           style={{
-            color: selected ? "#ffffff" : disabled ? "#999" : "#1e293b",
+            color: selected ? "#ffffff" : "#1e293b",
             fontFamily: 'Poppins, "Segoe UI", system-ui, sans-serif',
-            textShadow: selected ? "0 2px 4px rgba(0,0,0,0.1)" : "none",
           }}
         >
           {monthYear || "SESSION"}
         </h3>
 
+        {/* Badge Places disponibles */}
         <div className="mb-[15px] flex justify-center">
-          {!disabled ? (
+          {!disabled && session.remainingSpot > 0 ? (
             <div
-              className="flex items-center gap-2 rounded-[25px] px-5 py-3 backdrop-blur-[10px]"
+              className="flex items-center gap-[6px]"
               style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: selected ? '#ffffff' : '#1565c0',
+                letterSpacing: '0.4px',
+                whiteSpace: 'nowrap',
+                padding: '10px 18px',
+                borderRadius: 25,
                 background: selected
-                  ? "linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)"
-                  : "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)",
-                border: selected ? "2px solid rgba(255,255,255,0.4)" : "2px solid #2196f3",
+                  ? 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)'
+                  : 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+                border: selected
+                  ? '2px solid rgba(255,255,255,0.4)'
+                  : '2px solid #2196f3',
                 boxShadow: selected
-                  ? "0 4px 15px rgba(255,255,255,0.2)"
-                  : "0 4px 15px rgba(33, 150, 243, 0.2)",
+                  ? '0 4px 15px rgba(255,255,255,0.2)'
+                  : '0 4px 15px rgba(33, 150, 243, 0.2)',
+                backdropFilter: 'blur(10px)',
               }}
             >
-              <span
-                className="h-2 w-2 shrink-0 rounded-full"
-                style={{
-                  backgroundColor: selected ? "#ffffff" : "#2196f3",
-                  animation: "pulse 2s infinite",
-                }}
-                aria-hidden
-              />
-              <span
-                className="text-[14px] font-bold tracking-wide"
-                style={{
-                  color: selected ? "#ffffff" : "#1976d2",
-                  textShadow: selected ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
-                }}
-              >
-                {spotsLabel}
+              <div style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: selected ? '#ffffff' : '#2196f3',
+                animation: 'pulse 2s infinite',
+                flexShrink: 0,
+              }} />
+              <span style={{ fontWeight: 900, color: selected ? '#ffffff' : '#0d47a1' }}>
+                {session.remainingSpot}
               </span>
+              {' '}{session.remainingSpot === 1 ? dict.spotsAvailable : dict.spotsAvailable_plural}
             </div>
           ) : (
             <div
-              className="flex items-center gap-2 rounded-[25px] border-2 border-[#f44336] bg-gradient-to-br from-[#ffebee] to-[#ffcdd2] px-5 py-3 shadow-[0_4px_15px_rgba(244,67,54,0.2)]"
+              className="flex items-center gap-[8px] rounded-[25px] border-2 px-[20px] py-[12px]"
+              style={{
+                background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
+                borderColor: '#f44336',
+                boxShadow: '0 4px 15px rgba(244, 67, 54, 0.2)',
+              }}
             >
-              <span className="h-2 w-2 shrink-0 rounded-full bg-[#f44336]" aria-hidden />
-              <span className="text-[14px] font-bold tracking-wide text-[#d32f2f]">{noSpotsLabel}</span>
+              <span className="h-2 w-2 shrink-0 rounded-full bg-[#f43f5e]" aria-hidden />
+              <span className="text-[14px] font-bold tracking-[0.5px] text-[#d32f2f]">{dict.full}</span>
             </div>
           )}
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-1">
+        {/* Goûter offert */}
+        <div className="mb-[15px] flex justify-center">
+          <div
+            className="flex items-center gap-2 rounded-[25px] px-[22px] py-[10px]"
+            style={{
+              background: selected
+                ? 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)'
+                : 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+              border: selected
+                ? '2px solid rgba(255,255,255,0.4)'
+                : '2px solid #f97316',
+              boxShadow: selected
+                ? '0 4px 15px rgba(255,255,255,0.2)'
+                : '0 4px 15px rgba(249, 115, 22, 0.2)',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            <div style={{
+              width: 8, height: 8, borderRadius: '50%',
+              backgroundColor: selected ? '#ffffff' : '#f97316',
+            }} />
+            <span style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: selected ? '#ffffff' : '#c2410c',
+              letterSpacing: '0.5px'
+            }}>
+              {dict.sessionSnackOffered}
+            </span>
+          </div>
+        </div>
+
+        
+        <div className="flex min-h-0 flex-1 flex-col gap-[4px]">
           {formattedDetails.map((sessionDetail, idx) => (
             <div
-              key={`${session.sessionDetails}-${idx}`}
-              className="mb-1 flex-[0_0_auto] rounded-xl p-3 last:mb-0"
-              style={{
-                background: selected
-                  ? "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)"
-                  : "linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)",
-                boxShadow: selected
-                  ? "0 4px 16px rgba(255,255,255,0.1)"
-                  : "0 8px 32px rgba(0,0,0,0.08), 0 2px 16px rgba(0,0,0,0.04)",
-                border: selected ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.4)",
-              }}
+              key={idx}
+              className="flex flex-col gap-[10px]"
+              style={{ marginBottom: idx < formattedDetails.length - 1 ? 20 : 0 }}
             >
               <div
-                className="mb-2 rounded-lg px-2.5 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-white"
                 style={{
-                  background: selected
-                    ? "rgba(255,255,255,0.2)"
-                    : "linear-gradient(135deg, rgb(138, 43, 226) 0%, rgb(106, 27, 154) 100%)",
-                  fontFamily: 'Poppins, "Segoe UI", system-ui, sans-serif',
+                  padding: "10px 16px",
+                  borderRadius: "10px",
+                  background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                  marginBottom: 6,
+                  textAlign: "center",
+                  boxShadow: "0 4px 12px rgba(124, 58, 237, 0.25)",
                 }}
               >
-                {sessionDetail.title}
-              </div>
-
-              <div
-                className="mb-1 flex items-center gap-2 rounded-lg px-2 py-1"
-                style={{
-                  backgroundColor: selected ? "rgba(59, 130, 246, 0.15)" : "rgba(59, 130, 246, 0.08)",
-                }}
-              >
-                <div
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md shadow-[0_3px_10px_rgba(59,130,246,0.3)]"
+                <span
                   style={{
-                    background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+                    fontWeight: 900,
+                    fontSize: 13,
+                    color: "#fff",
+                    textTransform: "uppercase",
+                    letterSpacing: "1.5px",
                   }}
                 >
-                  <IconCalendar className="h-2.5 w-2.5 text-white" />
-                </div>
-                <div
-                  className="text-[10px] font-semibold leading-tight"
-                  style={{ color: selected ? "#ffffff" : "#374151" }}
-                >
-                  <span
-                    className="text-[9px]"
-                    style={{ color: selected ? "rgba(255,255,255,0.8)" : "#6b7280" }}
-                  >
-                    {sessionDetail.date.title}:
-                  </span>
-                  <br />
-                  <strong>{formatSessionDateWithSpace(sessionDetail.date.value)}</strong>
-                </div>
+                  {sessionDetail.title}
+                </span>
               </div>
 
+              {/* Date */}
               <div
-                className="mb-1 flex items-center gap-2 rounded-lg px-2 py-1"
                 style={{
-                  backgroundColor: selected ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.08)",
+                  background: selected ? "rgba(255,255,255,0.2)" : "#eff6ff",
+                  border: selected ? "1px solid rgba(255,255,255,0.3)" : "1px solid #dbeafe",
+                  padding: "12px 16px",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 15,
                 }}
               >
                 <div
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md shadow-[0_3px_10px_rgba(16,185,129,0.3)]"
                   style={{
-                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    background: "#3b82f6",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 4px 10px rgba(59, 130, 246, 0.3)",
+                    flexShrink: 0,
                   }}
                 >
-                  <IconClock className="h-2.5 w-2.5 text-white" />
+                  <IconCalendar className="h-[18px] w-[18px] text-white" />
                 </div>
-                <div
-                  className="text-[10px] font-semibold leading-tight"
-                  style={{ color: selected ? "#ffffff" : "#374151" }}
-                >
-                  <span
-                    className="text-[9px]"
-                    style={{ color: selected ? "rgba(255,255,255,0.8)" : "#6b7280" }}
+                <div style={{ textAlign: "left" }}>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: "#3b82f6",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.8px",
+                    }}
                   >
-                    {sessionDetail.time.title}:
-                  </span>
-                  <br />
-                  <strong>{sessionDetail.time.value}</strong>
+                    {sessionDetail.date.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 17,
+                      fontWeight: 950,
+                      color: selected ? "#fff" : "#1e3a8a",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {sessionDetail.date.value}
+                  </div>
                 </div>
               </div>
 
+              {/* Heure */}
               <div
-                className="flex items-center gap-2 rounded-lg px-2 py-1"
                 style={{
-                  backgroundColor: selected ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.08)",
+                  background: selected ? "rgba(255,255,255,0.2)" : "#ecfdf5",
+                  border: selected ? "1px solid rgba(255,255,255,0.3)" : "1px solid #d1fae5",
+                  padding: "12px 16px",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 15,
                 }}
               >
                 <div
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md shadow-[0_3px_10px_rgba(239,68,68,0.3)]"
                   style={{
-                    background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    background: "#10b981",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 4px 10px rgba(16, 185, 129, 0.3)",
+                    flexShrink: 0,
                   }}
                 >
-                  <IconMap className="h-2.5 w-2.5 text-white" />
+                  <IconClock className="h-[18px] w-[18px] text-white" />
                 </div>
-                <div
-                  className="text-[10px] font-semibold leading-tight"
-                  style={{ color: selected ? "#ffffff" : "#374151" }}
-                >
-                  <span
-                    className="text-[9px]"
-                    style={{ color: selected ? "rgba(255,255,255,0.8)" : "#6b7280" }}
+                <div style={{ textAlign: "left" }}>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: "#059669",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.8px",
+                    }}
                   >
-                    {sessionDetail.location.title}:
-                  </span>
-                  <br />
-                  {(() => {
-                    const maps = getMapsUrlForSessionLocation(sessionDetail.location.value);
-                    return maps ? (
+                    {sessionDetail.time.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 17,
+                      fontWeight: 950,
+                      color: selected ? "#fff" : "#064e3b",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {sessionDetail.time.value}
+                  </div>
+                </div>
+              </div>
+
+              {/* Lieu */}
+              <div
+                style={{
+                  background: selected ? "rgba(255,255,255,0.2)" : "#fff1f2",
+                  border: selected ? "1px solid rgba(255,255,255,0.3)" : "1px solid #ffe4e6",
+                  padding: "12px 16px",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 15,
+                }}
+              >
+                <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    background: "#f43f5e",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 4px 10px rgba(244, 63, 94, 0.3)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <IconMap className="h-[18px] w-[18px] text-white" />
+                </div>
+                <div style={{ textAlign: "left", flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: "#e11d48",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.8px",
+                    }}
+                  >
+                    {sessionDetail.location.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 950,
+                      color: selected ? "#fff" : "#881337",
+                      lineHeight: 1.2,
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {sessionDetail.location.url ? (
                       <a
-                        href={maps}
+                        href={sessionDetail.location.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline"
-                        style={{ color: "inherit" }}
-                        title={mapsLinkTitle}
+                        style={{ color: "inherit", cursor: "pointer" }}
+                        title={dict.sessionMapsLinkTitle}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <strong>{sessionDetail.location.value}</strong>
+                        {sessionDetail.location.value}
                       </a>
                     ) : (
-                      <strong>{sessionDetail.location.value}</strong>
-                    );
-                  })()}
+                      sessionDetail.location.value
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           ))}
-
-          {formattedDetails.length < 3 ? (
+          {/* Spacer if only 2 details to maintain height */}
+          {formattedDetails.length > 0 && formattedDetails.length < 3 && (
             <div
-              className="mb-0 flex-[0_0_auto] rounded-xl border border-transparent bg-transparent"
               style={{
-                minHeight: formattedDetails.length === 2 ? 200 : 400,
+                padding: 12,
+                border: "1px solid transparent",
+                borderRadius: 12,
+                backgroundColor: "transparent",
+                minHeight: formattedDetails.length === 2 ? 140 : 280,
+                flex: "0 0 auto",
+                marginBottom: 0,
               }}
               aria-hidden
             />
-          ) : null}
+          )}
 
           {formattedDetails.length === 0 ? (
             <div className="whitespace-pre-wrap break-words text-sm text-slate-800">{session.sessionDetails}</div>

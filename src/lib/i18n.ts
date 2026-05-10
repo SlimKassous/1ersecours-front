@@ -212,6 +212,9 @@ export const dictionary = {
     apiError: "Erreur serveur. Verifiez votre connexion.",
     spotsLeft: "{{count}} places",
     full: "Complet",
+    sessionSnackOffered: "Goûter offert pendant la pause",
+    spotsAvailable: "place restante",
+    spotsAvailable_plural: "places restantes",
   },
   en: {
     brand: "Success Driving - First Aid",
@@ -419,6 +422,9 @@ export const dictionary = {
     apiError: "Server error. Check your connection.",
     spotsLeft: "{{count}} spots",
     full: "Full",
+    sessionSnackOffered: "Snack offered during the break",
+    spotsAvailable: "spot available",
+    spotsAvailable_plural: "spots available",
   },
 } as const;
 

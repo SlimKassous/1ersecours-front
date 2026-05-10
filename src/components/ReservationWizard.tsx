@@ -8,7 +8,7 @@ import { DatePickerWithCalendar } from "@/components/DatePickerWithCalendar";
 import { ReservationSessionCard } from "@/components/ReservationSessionCard";
 import { ReservationStepper } from "@/components/ReservationStepper";
 import { api, type BookingEleve, type Lesson, type Session } from "@/lib/api";
-import { formatSessionDetails, sortSessionsByDate } from "@/lib/formatSessionDetails";
+import { formatSessionDateWithSpace, formatSessionDetails, getMapsUrlForSessionLocation, sortSessionsByDate } from "@/lib/formatSessionDetails";
 import type { Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/i18n";
 
@@ -44,6 +44,7 @@ function formatBirthDateRecap(iso: string): string {
   if (!m) return iso;
   return `${m[3]}/${m[2]}/${m[1]}`;
 }
+
 
 export function ReservationWizard({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
@@ -134,7 +135,8 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
       user.prenom.trim() &&
       user.email.trim() &&
       user.telephone.trim() &&
-      user.dateNaissance.trim(),
+      user.dateNaissance.trim() &&
+      user.adresse.trim(),
   );
 
   const maxBirthYear = new Date().getFullYear();
@@ -234,8 +236,12 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
   }, [selectedSession, locale]);
 
   return (
-    <div className="w-full max-w-none rounded-3xl border border-rose-100 bg-white/95 p-4 shadow-xl shadow-rose-200/35 backdrop-blur-sm sm:p-6 md:p-8 lg:p-10">
+    <div className="mx-auto w-full max-w-none space-y-6 sm:space-y-8">
+      {/* Stepper Card */}
       <ReservationStepper step={step} labels={stepLabels} />
+
+      {/* Main Content Card */}
+      <div className="w-full max-w-none rounded-3xl border border-rose-100 bg-white/95 p-4 shadow-xl shadow-rose-200/35 backdrop-blur-sm sm:p-6 md:p-8 lg:p-10">
 
       {loadingLessons ? (
         <p className="text-slate-600">{dict.processing}</p>
@@ -313,15 +319,13 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
                         const disabled = spots <= 0;
                         return (
                           <li key={s.sessionDetails} className="flex min-h-0">
-                            <ReservationSessionCard
-                              session={s}
-                              locale={locale}
-                              selected={sel}
-                              disabled={disabled}
-                              spotsLabel={dict.spotsLeft.replace("{{count}}", String(spots))}
-                              noSpotsLabel={dict.full}
-                              mapsLinkTitle={dict.sessionMapsLinkTitle}
-                              onPick={() => {
+                              <ReservationSessionCard
+                                session={s}
+                                locale={locale}
+                                dict={dict}
+                                selected={sel}
+                                disabled={disabled}
+                                onPick={() => {
                                 if (disabled) return;
                                 setSelectedSession(s);
                                 setStep(1);
@@ -339,6 +343,35 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
 
           {step === 1 ? (
             <div className="space-y-6">
+              {/* Step Title */}
+              <h2 className="fa-text-gradient text-center text-xl font-bold sm:text-2xl md:text-3xl">
+                Informations personnelles
+              </h2>
+
+              {/* Info Box */}
+              <div className="flex flex-col items-start justify-between gap-4 rounded-xl border border-blue-100 bg-blue-50/50 p-4 sm:flex-row sm:items-center sm:p-5">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white shadow-sm">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                      <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <p className="text-sm font-medium leading-relaxed text-slate-700">
+                    Si vous trouvez un problème lors de la saisie de vos informations pour la réservation, contactez-nous en saisissant vos informations dans le contenu de message et nous traiterons votre réservation tout de suite au{" "}
+                    <a href="tel:0788928684" className="font-bold text-blue-600 hover:underline">078 892 86 84</a>
+                  </p>
+                </div>
+                <Link
+                  href={`/${locale}/contact`}
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-bold text-white shadow-md transition hover:bg-indigo-600 sm:w-auto"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Contacter
+                </Link>
+              </div>
+
               {selectedSession ? (
                 <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-white via-indigo-50/20 to-violet-50/35 shadow-md shadow-indigo-100/40">
                   <div className="flex items-center gap-3 border-b border-indigo-100/80 bg-white/70 px-4 py-3 sm:px-5">
@@ -453,10 +486,15 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
                   defaultCalendarYearOffset={16}
                 />
               </div>
-              <label className="sm:col-span-2">
-                <span className="mb-2 block text-sm font-semibold text-slate-800">{dict.address}</span>
-                <textarea
-                  className={`${fieldInputClass} min-h-[100px] resize-y`}
+              <label>
+                <span className="mb-2 block text-sm font-semibold text-slate-800">
+                  {dict.address}{" "}
+                  <span className="text-red-500" aria-hidden>
+                    *
+                  </span>
+                </span>
+                <input
+                  className={fieldInputClass}
                   value={user.adresse}
                   onChange={(e) => setUser({ ...user, adresse: e.target.value })}
                   autoComplete="street-address"
@@ -467,90 +505,168 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
           ) : null}
 
           {step === 2 && lesson && selectedSession ? (
-            <div className="space-y-5 sm:space-y-6">
-              <h3 className="text-center text-2xl font-black text-[#b455cf] sm:text-3xl">{dict.stepRecap}</h3>
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
-                <div className="rounded-2xl border border-[#c9d7ef] bg-[#f8fbff] p-5 shadow-sm">
-                  <p className="text-center text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">{dict.selectCourse}</p>
-                  <p className="mt-2 text-center text-[1.75rem] leading-none" aria-hidden>🇨🇭</p>
-                  <p className="mt-2 text-center text-2xl font-black text-slate-800">{lesson.name}</p>
+            <div className="space-y-6 sm:space-y-8">
+              <h2 className="fa-text-gradient text-center text-2xl font-black sm:text-3xl">
+                {dict.recapTitle}
+              </h2>
 
-                  <div className="my-5 h-px w-full bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
+              <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
+                {/* ── Left Card: Course + Participant + Price ── */}
+                <div className="flex flex-col gap-6 rounded-2xl border-2 border-violet-100 bg-white/95 p-6 shadow-xl shadow-violet-100/30 sm:p-7 md:p-8">
+                  {/* Section Cours */}
+                  <div>
+                    <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-violet-500">
+                      {dict.recapSession}
+                    </p>
+                    <p className="text-lg font-black leading-tight text-slate-800 sm:text-xl">
+                      {lesson.name}
+                    </p>
+                  </div>
 
-                  <p className="text-center text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-600">{dict.recapParticipant}</p>
-                  <div className="mt-3 rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
-                    <div className="space-y-2.5 text-sm">
-                      <div className="flex items-center gap-2.5 rounded-lg bg-emerald-50/60 px-2.5 py-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500 text-white">•</span>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.firstName} / {dict.lastName}</p>
-                          <p className="font-extrabold text-slate-900">{user.prenom} {user.nom}</p>
+                  {/* Separator */}
+                  <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
+
+                  {/* Section Participant */}
+                  <div className="flex-1">
+                    <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-600">
+                      {dict.recapParticipant}
+                    </p>
+                    <div className="space-y-3.5 rounded-2xl border-2 border-emerald-500/10 bg-emerald-50/20 p-4 shadow-sm">
+                      {/* Name */}
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md">
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                          </svg>
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{dict.firstName} / {dict.lastName}</p>
+                          <p className="truncate text-sm font-extrabold text-slate-800">{user.prenom} {user.nom}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2.5 rounded-lg bg-blue-50/60 px-2.5 py-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500 text-white">@</span>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.email}</p>
-                          <p className="break-all font-bold text-slate-900">{user.email}</p>
+
+                      {/* Email */}
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md">
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                          </svg>
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{dict.email}</p>
+                          <p className="truncate text-sm font-extrabold text-slate-800">{user.email}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2.5 rounded-lg bg-pink-50/60 px-2.5 py-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-pink-500 text-white">☎</span>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.phone}</p>
-                          <p className="font-bold text-slate-900">{user.telephone}</p>
+
+                      {/* Phone */}
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 text-white shadow-md">
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                          </svg>
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{dict.phone}</p>
+                          <p className="truncate text-sm font-extrabold text-slate-800">{user.telephone}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2.5 rounded-lg bg-green-50/60 px-2.5 py-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-green-500 text-white">📅</span>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.birthDate}</p>
-                          <p className="font-bold text-slate-900">{user.dateNaissance ? formatBirthDateRecap(user.dateNaissance) : "-"}</p>
+
+                      {/* Date Birth */}
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md">
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zm-7-9H7v5h5v-5z" />
+                          </svg>
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{dict.birthDate}</p>
+                          <p className="truncate text-sm font-extrabold text-slate-800">{user.dateNaissance ? formatBirthDateRecap(user.dateNaissance) : "-"}</p>
                         </div>
                       </div>
-                      {user.adresse.trim() ? (
-                        <div className="flex items-center gap-2.5 rounded-lg bg-cyan-50/60 px-2.5 py-2">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-500 text-white">⌂</span>
-                          <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{dict.address}</p>
-                            <p className="whitespace-pre-line font-bold text-slate-900">{user.adresse}</p>
-                          </div>
+
+                      {/* Address */}
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-sky-600 text-white shadow-md">
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                          </svg>
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{dict.address}</p>
+                          <p className="truncate text-sm font-extrabold text-slate-800">{user.adresse}</p>
                         </div>
-                      ) : null}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="my-5 h-px w-full bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
-                  <p className="text-center text-[11px] font-bold uppercase tracking-[0.16em] text-violet-600">{dict.recapPrice}</p>
-                  <div className="mt-2 flex items-baseline justify-center gap-2">
-                    {priceDisplay.hasPromo ? (
-                      <span className="text-xl font-bold tabular-nums text-slate-400 line-through">{priceDisplay.listStr}</span>
-                    ) : null}
-                    <span className="fa-display text-5xl font-black tabular-nums text-[#b455cf]">{priceDisplay.payStr}</span>
+                  {/* Separator */}
+                  <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
+
+                  {/* Section Price */}
+                  <div>
+                    <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-violet-500">
+                      {dict.recapPrice}
+                    </p>
+                    <p className="fa-text-gradient text-3xl font-black sm:text-4xl">
+                      {lesson.promotionalPrice || lesson.price} CHF
+                    </p>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[#c9d7ef] bg-[#f8fbff] p-5 shadow-sm">
-                  <p className="text-center text-[11px] font-bold uppercase tracking-[0.16em] text-blue-700">{dict.recapSession}</p>
-                  <div className="mt-3 space-y-3">
+                {/* ── Right Card: Session Details ── */}
+                <div className="flex flex-col gap-6 rounded-2xl border-2 border-blue-100 bg-white/95 p-6 shadow-xl shadow-blue-100/30 sm:p-7 md:p-8">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-500">
+                    {dict.recapSession}
+                  </p>
+                  <div className="flex flex-col gap-4">
                     {recapSessionFormatted.length > 0 ? (
-                      recapSessionFormatted.map((p, idx) => (
-                        <div key={`recap-${idx}`} className="rounded-xl border border-[#c9d7ef] bg-white p-3.5 shadow-sm">
-                          <p className="rounded-lg bg-blue-600 px-3 py-1.5 text-center text-xs font-extrabold uppercase tracking-wide text-white">
-                            {p.title}
-                          </p>
-                          <div className="mt-2 space-y-2">
-                            <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-slate-700">
-                              <span className="font-bold text-slate-500">{p.date.title}: </span>
-                              {p.date.value}
+                      recapSessionFormatted.map((sessionDetail, idx) => (
+                        <div
+                          key={idx}
+                          className="flex flex-col gap-3 rounded-xl border border-blue-100/50 bg-white p-4 shadow-[0_2px_12px_rgba(59,130,246,0.10),0_1px_4px_rgba(0,0,0,0.05)] transition hover:shadow-lg sm:p-5"
+                          style={{ border: "1.5px solid rgba(59, 130, 246, 0.18)" }}
+                        >
+                          {/* Part Title - Gradient Badge like in ReservationCourse */}
+                          <div className="mb-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-700 px-3 py-1.5 text-center text-[11px] font-black uppercase tracking-wider text-white shadow-sm">
+                            {sessionDetail.title}
+                          </div>
+
+                          {/* Date */}
+                          <div className="flex items-center gap-3 rounded-lg bg-blue-50/50 px-2.5 py-2">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-[0_3px_10px_rgba(59,130,246,0.3)]">
+                              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z" />
+                              </svg>
+                            </span>
+                            <div>
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.date.label}</p>
+                              <p className="text-sm font-black text-slate-800">{sessionDetail.date.value}</p>
                             </div>
-                            <div className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-slate-700">
-                              <span className="font-bold text-slate-500">{p.time.title}: </span>
-                              {p.time.value}
+                          </div>
+
+                          {/* Time */}
+                          <div className="flex items-center gap-3 rounded-lg bg-emerald-50/50 px-2.5 py-2">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-[0_3px_10px_rgba(16,185,129,0.3)]">
+                              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                              </svg>
+                            </span>
+                            <div>
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.time.label}</p>
+                              <p className="text-sm font-black text-slate-800">{sessionDetail.time.value}</p>
                             </div>
-                            <div className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-semibold text-slate-700">
-                              <span className="font-bold text-slate-500">{p.location.title}: </span>
-                              <span className="break-words">{p.location.value}</span>
+                          </div>
+
+                          {/* Location */}
+                          <div className="flex items-center gap-3 rounded-lg bg-rose-50/50 px-2.5 py-2">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-[0_3px_10px_rgba(244,63,94,0.3)]">
+                              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                              </svg>
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.location.label}</p>
+                              <p className="truncate text-sm font-black text-slate-800">{sessionDetail.location.value}</p>
                             </div>
                           </div>
                         </div>
@@ -565,70 +681,100 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
           ) : null}
 
           {step === 3 && lesson ? (
-            <div className="space-y-6">
-              <p className="text-sm text-slate-600">{dict.paymentMethod}</p>
-              <div className="rounded-2xl border-2 border-[#f43f5e]/55 bg-gradient-to-br from-rose-50 to-fuchsia-50/80 p-4 shadow-lg shadow-rose-200/45 ring-1 ring-[#f43f5e]/15 sm:p-5">
-                <div className="flex gap-4">
-                  <span
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#635bff] via-[#0a2540] to-[#00d4aa] text-white shadow-md"
-                    aria-hidden
-                  >
-                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <div className="space-y-6 sm:space-y-8">
+              <h2 className="fa-text-gradient text-center text-2xl font-black sm:text-3xl">
+                {locale === "fr" ? "Méthode de paiement" : "Payment method"}
+              </h2>
+
+              <div
+                onClick={submit}
+                disabled={processing}
+                className={`group relative cursor-pointer overflow-hidden rounded-3xl border-2 border-violet-100 bg-white p-6 shadow-xl transition-all hover:border-violet-300 hover:shadow-2xl sm:p-8 ${processing ? "opacity-70 pointer-events-none" : ""}`}
+              >
+                {/* Background Decor */}
+                <div className="absolute -right-4 -top-4 h-32 w-32 rounded-full bg-violet-50/50 blur-3xl transition-all group-hover:bg-violet-100/50" />
+
+                <div className="relative flex flex-col items-center gap-6 text-center sm:flex-row sm:justify-center sm:text-left">
+                  {/* Icon Wrapper from ReservationCourse */}
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)]">
+                    <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                       <rect x="2" y="5" width="20" height="14" rx="2" />
                       <path d="M2 10h20" />
                     </svg>
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-slate-900">{dict.payByCard}</div>
-                    <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{dict.payCardHint}</p>
+                  </div>
+
+                  <div className="flex-1">
+                    <h3 className="text-xl font-black tracking-tight text-[#7c3aed] drop-shadow-sm sm:text-2xl">
+                      {locale === "fr" ? "Paiement par carte" : "Card Payment"}
+                    </h3>
+                    <p className="mt-2 text-sm font-extrabold leading-relaxed text-[#1e293b] sm:text-base">
+                      {locale === "fr" 
+                        ? "Paiement sécurisé via Stripe — Facture envoyée par e-mail." 
+                        : "Secure Stripe checkout — invoice by email."}
+                    </p>
+
+                    {/* Click Indicator Badge from ReservationCourse */}
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[rgba(139,92,246,0.28)] bg-gradient-to-r from-[rgba(124,58,237,0.12)] to-[rgba(236,72,153,0.12)] px-4 py-1.5 text-[11px] font-black uppercase tracking-wider text-[#7c3aed] shadow-sm transition-all group-hover:from-[rgba(124,58,237,0.2)]">
+                      <span>{locale === "fr" ? "Cliquez ici pour sélectionner" : "Click here to select"}</span>
+                      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                        <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
+
+                {/* Processing Overlay with Correct Accents */}
+                {processing && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/95 backdrop-blur-md">
+                    <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#a855f7] border-t-transparent shadow-lg" />
+                    <p className="mt-5 text-center font-black tracking-tight text-[#6b21a8]">
+                      {locale === "fr" 
+                        ? "Ouverture de la page de paiement Stripe sécurisée..." 
+                        : "Opening secure Stripe payment page..."}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Secure Payment Branding Footer */}
+              <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+                </svg>
+                <span>{locale === "fr" ? "Paiement 100% sécurisé" : "100% Secure Payment"}</span>
               </div>
             </div>
           ) : null}
         </>
       )}
 
-      <div className="mt-8 flex flex-col-reverse gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
+      <div className="mt-8 flex items-center justify-between gap-4 sm:mt-10">
+        <div>
           {step > 0 ? (
             <button
               type="button"
               onClick={prevStep}
-              className="w-full rounded-xl border-2 border-rose-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 hover:bg-rose-50 sm:w-auto min-h-[48px] touch-manipulation"
+              className="rounded-xl bg-slate-700 px-8 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-slate-800 sm:min-w-[140px] min-h-[48px] touch-manipulation"
             >
               {dict.back}
             </button>
           ) : null}
-          <Link
-            href={`/${locale}`}
-            className="inline-flex min-h-[44px] w-full items-center justify-center text-center text-sm font-semibold text-slate-600 underline decoration-rose-300 decoration-2 underline-offset-[3px] hover:text-[#be123c] sm:w-auto touch-manipulation"
-          >
-            {dict.reservationCancelHome}
-          </Link>
         </div>
-        {step < 3 ? (
+
+        {step < 3 && (
           <button
             type="button"
             onClick={nextStep}
             disabled={
               (step === 0 && !canGoStep1) || (step === 1 && !canGoStep2)
             }
-            className="fa-btn-primary w-full rounded-xl px-4 py-3.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40 sm:ml-auto sm:w-auto sm:min-w-[180px] min-h-[48px] touch-manipulation"
+            className="fa-btn-primary rounded-xl px-8 py-3.5 text-sm font-bold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-40 sm:min-w-[180px] min-h-[48px] touch-manipulation"
           >
-            {step === 2 ? dict.continueToPayment : dict.next}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={submit}
-            disabled={processing}
-            className="fa-btn-primary w-full rounded-xl px-4 py-3.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:min-w-[200px] min-h-[48px] touch-manipulation"
-          >
-            {processing ? dict.processing : dict.confirmPayCard}
+            {step === 2 ? (locale === "fr" ? "Payer" : "Pay") : dict.next}
           </button>
         )}
       </div>
+    </div>
     </div>
   );
 }

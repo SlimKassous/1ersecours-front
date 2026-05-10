@@ -23,7 +23,7 @@ export function formatSessionDetails(
 ): SessionDetail[] {
   const L = LABELS[locale];
   const regex =
-    /(\d+(?:ère|ème|ere|eme)? PARTIE)\s+(\w+)\s+(\d{2}\/\d{2}\/\d{4})\s+(\d{2}H\d{2}) à (\d{2}H\d{2})\s+(.+?)(?=\d+(?:ère|ème|ere|eme)? PARTIE|$)/g;
+    /(\d+[^\s\(\)]*?\s+PARTIE)\s+(\w+)\s+(\d{2}\/\d{2}\/\d{4})\s+(\d{2}H\d{2}) à (\d{2}H\d{2})\s+(.+?)(?=\d+[^\s\(\)]*?\s+PARTIE|$)/g;
 
   const dayMapping: Record<string, string> = {
     lundi: "Monday",
@@ -131,7 +131,15 @@ export function formatSessionDateWithSpace(dateValue: string): string {
 /** Lien Maps depuis le libellé lieu (parenthèses adresse), comme ReservationCourse. */
 export function getMapsUrlForSessionLocation(locationValue: string): string | null {
   if (!locationValue?.trim()) return null;
-  const addressMatch = locationValue.match(/\(([^)]*,\s*\d{4}\s+[^)]+)\)\s*$/);
-  const address = addressMatch ? addressMatch[1].trim() : locationValue.trim();
+  // Extraire tout ce qui est entre parenthèses (ex: "AGENCE EAUX VIVES (Route de Chêne 5)" → "Route de Chêne 5")
+  const matches = locationValue.match(/\(([^)]+)\)/g);
+  let rawAddress = locationValue.trim();
+  if (matches && matches.length > 0) {
+    // On prend le contenu du dernier bloc entre parenthèses
+    const lastMatch = matches[matches.length - 1];
+    rawAddress = lastMatch.substring(1, lastMatch.length - 1).trim();
+  }
+  // Ajoute ", Suisse" pour que Maps trouve toujours l'adresse en Suisse
+  const address = `${rawAddress}, Suisse`;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }

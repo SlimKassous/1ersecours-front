@@ -38,12 +38,6 @@ export default async function ReservationPage({
 
   return (
     <div className="w-full min-w-0 max-w-none">
-      <h1 className="fa-text-gradient mb-2 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-[2.25rem]">
-        {dict.reservationTitle}
-      </h1>
-      <p className="mb-6 max-w-4xl text-sm text-slate-600 sm:mb-8 sm:text-base lg:text-[1.05rem]">
-        {dict.reservationSubtitle}
-      </p>
       <ReservationWizard locale={locale} />
     </div>
   );
