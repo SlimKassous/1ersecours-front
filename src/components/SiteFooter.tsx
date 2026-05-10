@@ -373,6 +373,40 @@ export function SiteFooter({
                 </div>
               </a>
 
+              {/* Email */}
+              <a
+                href="mailto:info@success-ds.ch"
+                style={{ ...cardStyle }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(236,72,153,0.35)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(236,72,153,0.06)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.09)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    width: "34px", height: "34px", borderRadius: "10px",
+                    background: "rgba(236,72,153,0.15)", flexShrink: 0, color: "#ec4899",
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                  </svg>
+                </span>
+                <div>
+                  <p style={{ margin: 0, fontSize: "0.7rem", fontWeight: 700, color: "rgba(100,116,139,1)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Email
+                  </p>
+                  <p style={{ margin: "2px 0 0", fontSize: "0.9rem", fontWeight: 700, color: "#fff" }}>
+                    info@success-ds.ch
+                  </p>
+                </div>
+              </a>
+
               {/* Main site */}
               <a
                 href={mainSiteUrl}
@@ -457,13 +491,13 @@ export function SiteFooter({
               gap: "0.5rem",
             }}
           >
-            <p style={{ margin: 0, fontSize: "0.78rem", color: "rgba(100,116,139,0.9)", fontWeight: 500 }}>
+            <p style={{ margin: 0, fontSize: "0.82rem", color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
               ©{" "}
-              <span style={{ color: "#f43f5e", fontWeight: 700 }}>{year}</span>{" "}
+              <span style={{ color: "#f43f5e", fontWeight: 800 }}>{year}</span>{" "}
               Success Driving School —{" "}
               {isFr ? "Tous droits réservés." : "All rights reserved."}
             </p>
-            <p style={{ margin: 0, fontSize: "0.75rem", color: "rgba(71,85,105,0.9)" }}>
+            <p style={{ margin: 0, fontSize: "0.82rem", color: "rgba(255,255,255,0.85)", fontWeight: 700 }}>
               {isFr ? "Premiers Secours • Genève, Suisse" : "First Aid • Geneva, Switzerland"}
             </p>
           </div>
