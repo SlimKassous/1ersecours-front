@@ -86,7 +86,7 @@ function WheelScrollColumn({
   itemClass,
 }: WheelScrollColumnProps) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const debounceRef = useRef<number | undefined>();
+  const debounceRef = useRef<number | undefined>(undefined);
 
   const scrollToValue = useCallback(
     (v: number) => {
