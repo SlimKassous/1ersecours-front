@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useEffect,
   useMemo,
   useRef,
   useState,
