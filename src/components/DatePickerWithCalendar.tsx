@@ -3,7 +3,7 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -456,7 +456,7 @@ export function DatePickerWithCalendar({
     if (ok) closeDesktopPicker();
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!popoverOpen || !anchorFieldRef.current) return;
     const r = anchorFieldRef.current.getBoundingClientRect();
     const w = Math.min(window.innerWidth - 16, 360);
