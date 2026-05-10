@@ -118,15 +118,15 @@ export default async function LocaleLayout({
         />
         <div className="relative z-10 mx-auto flex w-full max-w-[min(100%,100rem)] flex-1 flex-col px-4 pb-8 pt-[10.2rem] sm:px-5 sm:pb-10 sm:pt-[10.8rem] md:px-7 md:pb-12 md:pt-[11.2rem] lg:px-10 xl:px-12">
           {children}
-          <SiteFooter
-            locale={locale}
-            addresses={addresses}
-            phoneTel={siteInfo.phone.phoneNumber}
-            phoneDisplay={siteInfo.phone.formattedPhoneNumber}
-            landlineDisplay={siteInfo.phone.formattedLandlineNumber}
-            mainSiteUrl={mainUrl}
-          />
         </div>
+        <SiteFooter
+          locale={locale}
+          addresses={addresses}
+          phoneTel={siteInfo.phone.phoneNumber}
+          phoneDisplay={siteInfo.phone.formattedPhoneNumber}
+          landlineDisplay={siteInfo.phone.formattedLandlineNumber}
+          mainSiteUrl={mainUrl}
+        />
       </div>
     </>
   );
