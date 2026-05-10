@@ -10,7 +10,7 @@ import type { Locale } from "@/lib/i18n";
 type Props = {
   session: Session;
   locale: Locale;
-  dict: Record<string, string>;
+  dict: Record<string, any>;
   selected: boolean;
   disabled: boolean;
   onPick: () => void;
