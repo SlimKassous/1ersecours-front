@@ -639,7 +639,7 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
                               </svg>
                             </span>
                             <div>
-                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.date.label}</p>
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.date.title}</p>
                               <p className="text-sm font-black text-slate-800">{sessionDetail.date.value}</p>
                             </div>
                           </div>
@@ -652,7 +652,7 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
                               </svg>
                             </span>
                             <div>
-                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.time.label}</p>
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.time.title}</p>
                               <p className="text-sm font-black text-slate-800">{sessionDetail.time.value}</p>
                             </div>
                           </div>
@@ -665,7 +665,7 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
                               </svg>
                             </span>
                             <div className="min-w-0">
-                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.location.label}</p>
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{sessionDetail.location.title}</p>
                               <p className="truncate text-sm font-black text-slate-800">{sessionDetail.location.value}</p>
                             </div>
                           </div>
@@ -688,7 +688,6 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
 
               <div
                 onClick={submit}
-                disabled={processing}
                 className={`group relative cursor-pointer overflow-hidden rounded-3xl border-2 border-violet-100 bg-white p-6 shadow-xl transition-all hover:border-violet-300 hover:shadow-2xl sm:p-8 ${processing ? "opacity-70 pointer-events-none" : ""}`}
               >
                 {/* Background Decor */}

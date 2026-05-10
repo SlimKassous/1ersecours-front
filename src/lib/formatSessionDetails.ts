@@ -10,7 +10,7 @@ export type SessionDetail = {
   title: string;
   date: { title: string; value: string };
   time: { title: string; value: string };
-  location: { title: string; value: string };
+  location: { title: string; value: string; url?: string };
 };
 
 /**
@@ -61,7 +61,11 @@ export function formatSessionDetails(
       title: displayPartTitle,
       date: { title: L.date, value: dateText },
       time: { title: L.time, value: heureText },
-      location: { title: L.location, value: location },
+      location: {
+        title: L.location,
+        value: location,
+        url: getMapsUrlForSessionLocation(location) || undefined,
+      },
     });
   }
 
