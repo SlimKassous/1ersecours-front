@@ -42,13 +42,19 @@ export async function loadSiteBootstrap(): Promise<{
 }> {
   const base = getApiBaseUrl();
 
-  const [addrRes, siteRes] = await Promise.all([
-    fetch(`${base}/api/addresses`, { next: { revalidate: 120 } }),
-    fetch(`${base}/api/public/site-info`, { next: { revalidate: 120 } }),
-  ]);
+  let addrRes, siteRes;
+  try {
+    [addrRes, siteRes] = await Promise.all([
+      fetch(`${base}/api/addresses`, { next: { revalidate: 120 } }),
+      fetch(`${base}/api/public/site-info`, { next: { revalidate: 120 } }),
+    ]);
+  } catch (e) {
+    console.error("Bootstrap fetch failed:", e);
+    return { addresses: [], siteInfo: { ...FALLBACK } };
+  }
 
   let addresses: BootstrapAddress[] = [];
-  if (addrRes.ok) {
+  if (addrRes?.ok) {
     try {
       const rows = (await addrRes.json()) as BootstrapAddress[];
       if (Array.isArray(rows)) addresses = rows;
@@ -58,7 +64,7 @@ export async function loadSiteBootstrap(): Promise<{
   }
 
   let siteInfo: BootstrapSiteInfo = { ...FALLBACK };
-  if (siteRes.ok) {
+  if (siteRes?.ok) {
     try {
       const raw = (await siteRes.json()) as Record<string, unknown>;
       const phone = raw.phone as BootstrapSiteInfo["phone"] | undefined;
