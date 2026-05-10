@@ -8,7 +8,7 @@ import { DatePickerWithCalendar } from "@/components/DatePickerWithCalendar";
 import { ReservationSessionCard } from "@/components/ReservationSessionCard";
 import { ReservationStepper } from "@/components/ReservationStepper";
 import { api, type BookingEleve, type Lesson, type Session } from "@/lib/api";
-import { formatSessionDateWithSpace, formatSessionDetails, getMapsUrlForSessionLocation, sortSessionsByDate } from "@/lib/formatSessionDetails";
+import { formatSessionDetails, sortSessionsByDate } from "@/lib/formatSessionDetails";
 import type { Locale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/i18n";
 
@@ -98,12 +98,17 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
     };
   }, [locale, dict.apiError]);
 
+  const [prevLessonId, setPrevLessonId] = useState(lessonId);
+    if (lessonId !== prevLessonId) {
+    setPrevLessonId(lessonId);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSessions([]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedSession(null);
+  }
+
   useEffect(() => {
-    if (!lessonId) {
-      setSessions([]);
-      setSelectedSession(null);
-      return;
-    }
+    if (!lessonId) return;
     let cancelled = false;
     (async () => {
       try {
@@ -111,7 +116,6 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
         const data = await api.getSessions(lessonId);
         if (cancelled) return;
         setSessions(data ?? []);
-        setSelectedSession(null);
       } catch (e) {
         if (!cancelled) {
           toast.error(parseErrMessage(e) || dict.apiError, { id: "load-sessions" });
@@ -217,18 +221,6 @@ export function ReservationWizard({ locale }: { locale: Locale }) {
     dict.stepPay,
   ] as const;
 
-  const priceDisplay = useMemo(() => {
-    if (!lesson) return { pay: 0, list: 0, hasPromo: false, payStr: "", listStr: "" };
-    const list = Number(lesson.price);
-    const promoRaw = lesson.promotionalPrice;
-    const promo =
-      promoRaw != null && !Number.isNaN(Number(promoRaw)) ? Number(promoRaw) : null;
-    const hasPromo = promo != null && promo < list;
-    const pay = hasPromo ? promo : list;
-    const payStr = `${pay} CHF`;
-    const listStr = `${list} CHF`;
-    return { pay, list, hasPromo, payStr, listStr };
-  }, [lesson]);
 
   const recapSessionFormatted = useMemo(() => {
     if (!selectedSession) return [];

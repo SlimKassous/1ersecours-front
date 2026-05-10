@@ -6,9 +6,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { LocaleFlag } from "@/components/LocaleFlag";
 import type { Locale } from "@/lib/i18n";
-import { getDictionary, locales } from "@/lib/i18n";
+import { getDictionary } from "@/lib/i18n";
 
 /** Même fichier que successdriving `ToolbarComponent` : `logo-nobackground-200.webp`, sans fond. */
 const TOOLBAR_LOGO = "/branding/logo-nobackground-200.webp";
@@ -25,9 +24,6 @@ export function LocaleHeader({ locale, phoneTel, phoneDisplay, addressDisplay }:
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;

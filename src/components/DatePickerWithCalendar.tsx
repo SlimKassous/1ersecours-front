@@ -219,9 +219,11 @@ export function DatePickerWithCalendar({
     [separator],
   );
 
-  useEffect(() => {
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     setTextValue(isoToDisplay(value));
-  }, [value, isoToDisplay]);
+  }
 
   const getDaysInMonth = (year: number, month: number): number => {
     if (month < 1 || month > 12) return 0;

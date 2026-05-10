@@ -1,10 +1,8 @@
-"use client";
+"use client";
 
 import type { Session } from "@/lib/api";
 import {
-  formatSessionDateWithSpace,
   formatSessionDetails,
-  getMapsUrlForSessionLocation,
   getMonthYearFromSessionDetails,
 } from "@/lib/formatSessionDetails";
 import type { Locale } from "@/lib/i18n";
@@ -12,7 +10,7 @@ import type { Locale } from "@/lib/i18n";
 type Props = {
   session: Session;
   locale: Locale;
-  dict: any;
+  dict: Record<string, string>;
   selected: boolean;
   disabled: boolean;
   onPick: () => void;
